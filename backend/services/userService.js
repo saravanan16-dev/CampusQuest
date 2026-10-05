@@ -57,30 +57,37 @@ const register = async ({ username, name, email, password, role = "STUDENT", col
     };
 };
 
-const login = async ({ username, email, password }) => {
-    const identifier = username || email;
-    if (!identifier) {
-        const error = new Error("Username or email is required");
+const login = async ({ username, email, identifier: idParam, password }) => {
+    const rawIdentifier = idParam || username || email || "";
+    const identifier = rawIdentifier.trim();
+    if (!identifier || !password) {
+        const error = new Error("Username or email and password are required");
         error.statusCode = 400;
         throw error;
     }
 
-    let user = await userModel.findByUsername(identifier);
-    if (!user) {
-        user = await userModel.findByEmail(identifier);
-    }
+    const user = await userModel.findByEmailOrUsername(identifier);
 
     if (!user) {
-        const error = new Error("Invalid username or password");
+        const error = new Error("Invalid username/email or password");
         error.statusCode = 401;
         throw error;
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-        const error = new Error("Invalid username or password");
+        const error = new Error("Invalid username/email or password");
         error.statusCode = 401;
         throw error;
+    }
+
+    // Update daily streak for student if applicable
+    if (user.role === "STUDENT") {
+        try {
+            await gamificationService.updateStreak(user.id);
+        } catch (e) {
+            // Non-blocking streak update
+        }
     }
 
     const token = generateToken(user);

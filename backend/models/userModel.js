@@ -1,12 +1,24 @@
 const db = require("../config/db");
 
 const findByEmail = async (email) => {
-    const [rows] = await db.query("SELECT * FROM users WHERE email = ?", [email]);
+    if (!email) return null;
+    const [rows] = await db.query("SELECT * FROM users WHERE LOWER(email) = LOWER(?)", [email.trim()]);
     return rows[0];
 };
 
 const findByUsername = async (username) => {
-    const [rows] = await db.query("SELECT * FROM users WHERE username = ?", [username]);
+    if (!username) return null;
+    const [rows] = await db.query("SELECT * FROM users WHERE LOWER(username) = LOWER(?)", [username.trim()]);
+    return rows[0];
+};
+
+const findByEmailOrUsername = async (identifier) => {
+    if (!identifier) return null;
+    const clean = identifier.trim();
+    const [rows] = await db.query(
+        "SELECT * FROM users WHERE LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?)",
+        [clean, clean]
+    );
     return rows[0];
 };
 
@@ -60,6 +72,7 @@ const updateUserRole = async (id, role) => {
 module.exports = {
     findByEmail,
     findByUsername,
+    findByEmailOrUsername,
     findById,
     createUser,
     updateUser,

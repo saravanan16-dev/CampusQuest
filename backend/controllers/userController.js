@@ -40,16 +40,18 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        const body = req.body || {};
+        const identifier = (body.emailOrUsername || body.username || body.email || body.identifier || "").trim();
+        const password = body.password;
 
-        if ((!username && !email) || !password) {
+        if (!identifier || !password) {
             return res.status(400).json({
                 success: false,
-                message: "Username/email and password are required"
+                message: "Email or username and password are required"
             });
         }
 
-        const data = await userService.login({ username, email, password });
+        const data = await userService.login({ identifier, username: identifier, email: identifier, password });
 
         res.json({
             success: true,

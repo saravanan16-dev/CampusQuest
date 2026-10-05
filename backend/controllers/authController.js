@@ -27,13 +27,14 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { email, username, password } = req.body;
-        const emailOrUsername = email || username;
+        const body = req.body || {};
+        const emailOrUsername = (body.emailOrUsername || body.username || body.email || body.identifier || "").trim();
+        const password = body.password;
 
         if (!emailOrUsername || !password) {
             return res.status(400).json({
                 success: false,
-                message: "Email/username and password are required"
+                message: "Email or username and password are required"
             });
         }
 

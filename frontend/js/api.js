@@ -73,9 +73,16 @@ const API = {
 
     // Auth endpoints
     login(credentials) {
+        const payload = typeof credentials === "object" ? {
+            ...credentials,
+            username: (credentials.username || credentials.emailOrUsername || credentials.email || "").trim(),
+            email: (credentials.email || credentials.emailOrUsername || credentials.username || "").trim(),
+            emailOrUsername: (credentials.emailOrUsername || credentials.username || credentials.email || "").trim()
+        } : credentials;
+
         return this.request("/login", {
             method: "POST",
-            body: JSON.stringify(credentials)
+            body: JSON.stringify(payload)
         });
     },
 
