@@ -103,33 +103,65 @@ const initDatabase = async () => {
             }
         }
 
-        // 4. questions table
+        // 4. questions table (Phase 3: Subject -> Unit -> Question)
         await db.query(`
             CREATE TABLE IF NOT EXISTS questions (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 subject_id INT NOT NULL,
-                unit INT NOT NULL,
-                topic VARCHAR(150) NOT NULL,
+                unit_id INT NULL,
+                unit INT NOT NULL DEFAULT 1,
+                topic VARCHAR(150) NOT NULL DEFAULT 'General',
+                question TEXT NULL,
                 question_text TEXT NOT NULL,
                 difficulty ENUM('EASY', 'MEDIUM', 'HARD') DEFAULT 'MEDIUM',
                 question_type VARCHAR(50) DEFAULT 'MCQ',
-                correct_answer VARCHAR(10) NOT NULL,
+                correct_answer VARCHAR(10) NOT NULL DEFAULT 'A',
                 explanation TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
+                FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE,
+                FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         `);
 
-        // 5. question_options table
+        // Check if unit_id and question exist in questions
+        const [qCols] = await db.query("SHOW COLUMNS FROM questions");
+        const qColNames = qCols.map(c => c.Field);
+        if (!qColNames.includes("unit_id")) {
+            await db.query("ALTER TABLE questions ADD COLUMN unit_id INT NULL AFTER subject_id");
+            try {
+                await db.query("ALTER TABLE questions ADD CONSTRAINT fk_questions_unit FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE SET NULL");
+            } catch (e) {}
+        }
+        if (!qColNames.includes("question")) {
+            await db.query("ALTER TABLE questions ADD COLUMN question TEXT NULL AFTER topic");
+            await db.query("UPDATE questions SET question = question_text WHERE question IS NULL");
+        }
+
+        // 5. question_options table (Phase 3: Question Options with is_correct)
         await db.query(`
             CREATE TABLE IF NOT EXISTS question_options (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 question_id INT NOT NULL,
-                option_key VARCHAR(10) NOT NULL,
+                option_key VARCHAR(10) NOT NULL DEFAULT 'A',
                 option_text TEXT NOT NULL,
+                is_correct BOOLEAN DEFAULT FALSE,
                 FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         `);
+
+        // Check if is_correct exists in question_options
+        const [qoCols] = await db.query("SHOW COLUMNS FROM question_options");
+        const qoColNames = qoCols.map(c => c.Field);
+        if (!qoColNames.includes("is_correct")) {
+            await db.query("ALTER TABLE question_options ADD COLUMN is_correct BOOLEAN DEFAULT FALSE AFTER option_text");
+            // Backfill is_correct from question.correct_answer
+            await db.query(`
+                UPDATE question_options qo
+                JOIN questions q ON qo.question_id = q.id
+                SET qo.is_correct = TRUE
+                WHERE qo.option_key = q.correct_answer
+            `);
+        }
 
         // 6. pyqs table
         await db.query(`
@@ -205,13 +237,15 @@ const initDatabase = async () => {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         `);
 
-        // 11. practice_attempts table
+        // 11. practice_attempts table (Phase 3: Module 5 Practice Attempts)
         await db.query(`
             CREATE TABLE IF NOT EXISTS practice_attempts (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
                 subject_id INT NOT NULL,
+                unit_id INT NULL,
                 unit INT NULL,
+                score INT DEFAULT 0,
                 difficulty VARCHAR(20) NULL,
                 total_questions INT DEFAULT 0,
                 correct_answers INT DEFAULT 0,
@@ -219,24 +253,56 @@ const initDatabase = async () => {
                 accuracy DECIMAL(5,2) DEFAULT 0.00,
                 time_taken_seconds INT DEFAULT 0,
                 xp_earned INT DEFAULT 0,
+                completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
+                FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE,
+                FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         `);
 
-        // 12. practice_answers table
+        // Check columns in practice_attempts
+        const [paCols] = await db.query("SHOW COLUMNS FROM practice_attempts");
+        const paColNames = paCols.map(c => c.Field);
+        if (!paColNames.includes("unit_id")) {
+            await db.query("ALTER TABLE practice_attempts ADD COLUMN unit_id INT NULL AFTER subject_id");
+            try {
+                await db.query("ALTER TABLE practice_attempts ADD CONSTRAINT fk_pa_unit FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE SET NULL");
+            } catch (e) {}
+        }
+        if (!paColNames.includes("score")) {
+            await db.query("ALTER TABLE practice_attempts ADD COLUMN score INT DEFAULT 0 AFTER unit_id");
+            await db.query("UPDATE practice_attempts SET score = correct_answers WHERE score = 0");
+        }
+        if (!paColNames.includes("completed_at")) {
+            await db.query("ALTER TABLE practice_attempts ADD COLUMN completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER xp_earned");
+        }
+
+        // 12. practice_answers table (Phase 3: Module 6 Practice Answers)
         await db.query(`
             CREATE TABLE IF NOT EXISTS practice_answers (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                practice_attempt_id INT NOT NULL,
+                attempt_id INT NULL,
+                practice_attempt_id INT NULL,
                 question_id INT NOT NULL,
+                selected_option_id INT NULL,
                 selected_option VARCHAR(10),
                 is_correct BOOLEAN DEFAULT FALSE,
                 FOREIGN KEY (practice_attempt_id) REFERENCES practice_attempts(id) ON DELETE CASCADE,
                 FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         `);
+
+        // Check columns in practice_answers
+        const [panCols] = await db.query("SHOW COLUMNS FROM practice_answers");
+        const panColNames = panCols.map(c => c.Field);
+        if (!panColNames.includes("attempt_id")) {
+            await db.query("ALTER TABLE practice_answers ADD COLUMN attempt_id INT NULL AFTER id");
+            await db.query("UPDATE practice_answers SET attempt_id = practice_attempt_id WHERE attempt_id IS NULL");
+        }
+        if (!panColNames.includes("selected_option_id")) {
+            await db.query("ALTER TABLE practice_answers ADD COLUMN selected_option_id INT NULL AFTER question_id");
+        }
 
         // 13. user_progress table
         await db.query(`
@@ -534,6 +600,21 @@ const initDatabase = async () => {
             JOIN units u ON n.subject_id = u.subject_id AND n.unit = u.unit_number
             SET n.unit_id = u.id
             WHERE n.unit_id IS NULL
+        `);
+
+        // Link questions to units and backfill question column (Phase 3)
+        await db.query(`
+            UPDATE questions q
+            JOIN units u ON q.subject_id = u.subject_id AND q.unit = u.unit_number
+            SET q.unit_id = u.id
+            WHERE q.unit_id IS NULL
+        `);
+        await db.query("UPDATE questions SET question = question_text WHERE question IS NULL");
+        await db.query(`
+            UPDATE question_options qo
+            JOIN questions q ON qo.question_id = q.id
+            SET qo.is_correct = TRUE
+            WHERE qo.option_key = q.correct_answer AND qo.is_correct = FALSE
         `);
         const [qCount] = await db.query("SELECT COUNT(*) AS cnt FROM questions");
         if (qCount[0].cnt === 0 && subMap["Database Management Systems"]) {

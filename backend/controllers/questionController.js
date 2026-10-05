@@ -2,9 +2,10 @@ const questionService = require("../services/questionService");
 
 const getQuestions = async (req, res) => {
     try {
-        const { subjectId, subject_id, unit, difficulty, topic, limit } = req.query;
+        const { subjectId, subject_id, unit, unit_id, difficulty, topic, limit } = req.query;
         const questions = await questionService.getQuestions({
-            subject_id: subjectId || subject_id,
+            subject_id: subject_id || subjectId,
+            unit_id,
             unit,
             difficulty,
             topic,
@@ -49,30 +50,50 @@ const getQuestion = async (req, res) => {
 
 const createQuestion = async (req, res) => {
     try {
-        const { subject_id, unit, topic, question_text, difficulty, question_type, correct_answer, explanation, options } = req.body;
+        const {
+            subject_id,
+            subjectId,
+            unit_id,
+            unitId,
+            unit,
+            topic,
+            question,
+            question_text,
+            difficulty,
+            question_type,
+            correct_answer,
+            explanation,
+            options
+        } = req.body;
 
-        if (!subject_id || !unit || !question_text || !correct_answer) {
+        const targetSubjectId = subject_id || subjectId;
+        const targetUnitId = unit_id || unitId;
+        const targetQuestion = question || question_text;
+
+        if (!targetSubjectId || (!unit && !targetUnitId) || !targetQuestion) {
             return res.status(400).json({
                 success: false,
-                message: "Subject ID, unit, question text, and correct answer are required"
+                message: "Subject ID, unit (or unit_id), and question text are required"
             });
         }
 
-        const question = await questionService.createQuestion({
-            subject_id,
+        const newQuestion = await questionService.createQuestion({
+            subject_id: targetSubjectId,
+            unit_id: targetUnitId,
             unit,
             topic: topic || "General",
-            question_text,
+            question: targetQuestion,
+            question_text: targetQuestion,
             difficulty: difficulty || "MEDIUM",
             question_type: question_type || "MCQ",
             correct_answer,
-            explanation,
+            explanation: explanation || "",
             options: options || []
         });
 
         res.status(201).json({
             success: true,
-            data: question
+            data: newQuestion
         });
     } catch (error) {
         console.error("Create question error:", error.message);

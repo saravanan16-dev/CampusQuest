@@ -1,0 +1,470 @@
+=== PAGE 1 ===
+Select a subject
+Select a unit
+View questions
+Practice MCQs
+Submit answers
+Receive instant results
+Review incorrect answers
+Track previous practice attempts
+CAMPUSQUEST — PHASE 3 BUILDING PLAN
+Question Bank & Practice Arena
+1. Phase 3 Goal
+The goal of Phase 3 is to transform CampusQuest from a basic notes and learning platform into 
+an exam-preparation platform.
+Students should be able to:
+Target Flow
+Student
+   ↓
+Choose Subject
+   ↓
+Choose Unit
+   ↓
+Question Bank
+   ↓
+Practice Questions
+   ↓
+Submit Answers
+   ↓
+Score
+   ↓
+Review Answers
+   ↓
+Attempt History
+2. Phase 3 Roadmap
+The development order for Phase 3 is:
+
+=== PAGE 2 ===
+1. Question Bank
+        ↓
+2. Question Options
+        ↓
+3. Question Bank APIs
+        ↓
+4. Practice Arena
+        ↓
+5. Practice Attempts
+        ↓
+6. Practice Result
+        ↓
+7. Review Answers
+        ↓
+8. Frontend
+        ↓
+9. Phase 3 Testing
+3. Module 1 — Question Bank
+The Question Bank stores questions that students can use for practice.
+Initially, CampusQuest will support Multiple Choice Questions (MCQs).
+Questions Table
+questions
+-------------------------
+id
+subject_id
+unit_id
+question
+question_type
+difficulty
+explanation
+created_at
+Example
+Question:
+Which SQL command is used to retrieve data?
+A. INSERT
+B. UPDATE
+
+=== PAGE 3 ===
+C. SELECT
+D. DELETE
+The question should be connected to:
+Subject → Unit → Question
+Example
+Database Management Systems
+        ↓
+Unit 2 — SQL
+        ↓
+SQL SELECT Command
+4. Module 2 — Question Options
+Each question will contain multiple options.
+Question Options Table
+question_options
+-------------------------
+id
+question_id
+option_text
+is_correct
+Relationship
+Question
+   ↓
+Option A
+Option B
+Option C
+Option D
+The correct option should be stored using is_correct .
+Example:
+Question:
+Which SQL command is used to retrieve data?
+A. INSERT
+B. UPDATE
+
+=== PAGE 4 ===
+C. SELECT ✓
+D. DELETE
+5. Module 3 — Question Bank APIs
+Create CRUD APIs for managing questions.
+Get All Questions
+GET /questions
+Get One Question
+GET /questions/:id
+Create Question
+POST /questions
+Update Question
+PUT /questions/:id
+Delete Question
+DELETE /questions/:id
+Question Filtering
+Students should eventually be able to filter questions.
+By Subject
+GET /questions?subject_id=1
+By Unit
+GET /questions?unit_id=2
+By Difficulty
+GET /questions?difficulty=easy
+This will allow CampusQuest to provide more personalized practice later.
+6. Module 4 — Practice Arena
+
+=== PAGE 5 ===
+The Practice Arena allows students to actually attempt questions.
+Basic Flow
+Start Practice
+      ↓
+Question 1
+      ↓
+Select Answer
+      ↓
+Submit Answer
+      ↓
+Correct / Wrong
+      ↓
+Next Question
+      ↓
+Complete Practice
+Initial APIs
+POST /practice/start
+POST /practice/submit
+7. Module 5 — Practice Attempts
+CampusQuest must store a student's practice history.
+Practice Attempts Table
+practice_attempts
+-------------------------
+id
+user_id
+subject_id
+unit_id
+score
+total_questions
+completed_at
+This table represents one complete practice session.
+Example
+User: Saravanan
+Subject: DBMS
+
+=== PAGE 6 ===
+Progress tracking
+Weak-topic detection
+Performance analytics
+Personalized practice
+AI recommendations
+Unit: SQL
+Score: 8
+Total Questions: 10
+Percentage: 80%
+8. Module 6 — Practice Answers
+Each answer submitted by the student should also be stored.
+Practice Answers Table
+practice_answers
+-------------------------
+id
+attempt_id
+question_id
+selected_option_id
+is_correct
+Relationship
+Practice Attempt
+       ↓
+Practice Answers
+       ↓
+Question
+       ↓
+Selected Option
+This data will later be used for:
+9. Module 7 — Practice Result
+After completing a practice session, show the student a result page.
+Example
+
+=== PAGE 7 ===
+Total questions
+Correct answers
+Incorrect answers
+Score
+Percentage
+Review option
+Practice again option
+--------------------------------
+        PRACTICE RESULT
+--------------------------------
+          8 / 10
+           80%
+Correct Answers:       8
+Wrong Answers:         2
+[ Review Answers ]
+[ Practice Again ]
+--------------------------------
+The result should contain:
+10. Module 8 — Review Answers
+Students should be able to review their answers after completing a practice session.
+For each question, show:
+Question
+   ↓
+Your Answer
+   ↓
+Correct Answer
+   ↓
+Explanation
+Example
+Question:
+Which SQL command is used to retrieve data?
+
+=== PAGE 8 ===
+Your Answer:
+INSERT
+Correct Answer:
+SELECT
+Explanation:
+SELECT is used to retrieve data from a database.
+This makes the practice system useful for learning, not just scoring.
+11. Module 9 — Frontend
+After the backend APIs are completed and tested, build the Phase 3 frontend.
+Suggested Structure
+frontend/
+│
+├── questions.html
+├── practice.html
+├── result.html
+│
+└── js/
+    ├── questions.js
+    ├── practice.js
+    └── result.js
+12. Student Practice Flow
+The complete frontend flow should be:
+Dashboard
+    ↓
+Select Subject
+    ↓
+Select Unit
+    ↓
+Start Practice
+    ↓
+Question 1
+    ↓
+Question 2
+    ↓
+
+=== PAGE 9 ===
+Question 3
+    ↓
+...
+    ↓
+Submit Practice
+13. Phase 3 Database Structure
+By the end of Phase 3, the main database relationship should look like:
+users
+   │
+   ├───────────────┐
+   │               │
+   ↓               ↓
+subjects      practice_attempts
+   │               │
+   ↓               ↓
+units       practice_answers
+   │               │
+   ↓               ↓
+questions ←────────┘
+   │
+   ↓
+question_options
+Core Learning Structure
+STUDENT
+   ↓
+SUBJECT
+   ↓
+UNIT
+   ↓
+QUESTION
+   ↓
+OPTIONS
+Practice Structure
+STUDENT
+   ↓
+PRACTICE ATTEMPT
+   ↓
+PRACTICE ANSWERS
+
+=== PAGE 10 ===
+   ↓
+QUESTIONS
+14. Features Not Included in Phase 3
+To keep development manageable, the following features will be implemented in later phases:
+❌  Previous Year Questions (PYQs)
+❌  Mock Tests
+❌  XP / Levels
+❌  Streaks
+❌  Achievements
+❌  Leaderboard
+❌  Admin Panel
+❌  AI Recommendations
+❌  AI Learning Assistant
+These features should not be added until the core Question Bank and Practice Arena are 
+stable.
+15. Phase 3 Testing
+All APIs should be tested using the existing .http  workflow.
+Questions
+GET /questions
+GET /questions/:id
+POST /questions
+PUT /questions/:id
+DELETE /questions/:id
+Filtering
+GET /questions?subject_id=1
+GET /questions?unit_id=2
+GET /questions?difficulty=easy
+
+=== PAGE 11 ===
+1. Create a question
+2. Add options
+3. Mark the correct option
+4. Retrieve the question
+5. Filter questions by subject
+6. Filter questions by unit
+7. Start a practice session
+8. Submit correct answer
+9. Submit incorrect answer
+10. Complete a practice session
+11. Calculate score
+12. Store practice attempt
+13. Store individual answers
+14. View practice result
+15. Review incorrect answers
+16. Practice again
+Practice
+POST /practice/start
+POST /practice/submit
+Test Scenarios
+16. Phase 3 Completion Criteria
+Phase 3 is considered complete when a student can successfully perform the following flow:
+Login
+  ↓
+Choose Subject
+  ↓
+Choose Unit
+  ↓
+Start Practice
+  ↓
+Answer MCQs
+  ↓
+Submit Answers
+  ↓
+
+=== PAGE 12 ===
+Receive Score
+  ↓
+Review Mistakes
+  ↓
+View Attempt History
+The system should correctly store the student's practice data in MySQL.
+17. Phase 3 Final Milestones
+Milestone Status
+Question 
+Bank
+Pending
+Question 
+Options
+Pending
+Question 
+APIs
+Pending
+Question 
+Filtering
+Pending
+Practice 
+Arena
+Pending
+Practice 
+Attempts
+Pending
+Practice 
+Answers
+Pending
+Practice 
+Result
+Pending
+Answer 
+Review
+Pending
+Frontend Pending
+
+=== PAGE 13 ===
+Full 
+Phase 3 
+Testing
+Pending
+18. Immediate Implementation Order
+Follow this exact order while developing Phase 3:
+1. Create questions table
+        ↓
+2. Create question_options table
+        ↓
+3. Build Question Model
+        ↓
+4. Build Question Service
+        ↓
+5. Build Question Controller
+        ↓
+6. Build Question Routes
+        ↓
+7. Test Question APIs
+        ↓
+8. Add Question Filtering
+        ↓
+9. Create practice_attempts table
+↓
+19. Phase 3 Final Target
+At the completion of Phase 3, CampusQuest will have three important layers:
+             CAMPUSQUEST
+                  │
+        ┌─────────┴─────────┐
+        ↓                   ↓
+   LEARNING             PRACTICE
+        │                   │
+   Subjects              Questions
+        ↓                   ↓
+      Units              MCQs
+        ↓                   ↓
+      Notes             Attempts
+                            ↓
+
+=== PAGE 14 ===
+PYQs
+Mock Tests
+Progress Tracking
+Gamification
+Leaderboards
+AI-powered recommendations
+                          Score
+                            ↓
+                         Review
+This gives CampusQuest its first real exam-preparation capability and creates the data 
+foundation required for the next phases:
+Phase 3 Completion Target
+A student can log in, choose a subject and unit, practice MCQs, submit answers, 
+receive a score, review mistakes, and have the complete attempt stored in MySQL.

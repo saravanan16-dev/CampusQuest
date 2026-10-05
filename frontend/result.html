@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice Result - CampusQuest</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .result-banner { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%); color: white; border-radius: 16px; padding: 40px 30px; box-shadow: 0 10px 25px -5px rgba(49, 46, 129, 0.25); }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 6px solid #10b981; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto; background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(4px); }
+        .score-circle.needs-work { border-color: #f59e0b; }
+        .score-circle.poor { border-color: #ef4444; }
+        .review-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; transition: transform 0.15s ease; }
+        .review-card.correct { border-left: 5px solid #10b981; }
+        .review-card.incorrect { border-left: 5px solid #ef4444; }
+        .answer-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 9999px; font-size: 0.9rem; font-weight: 600; }
+        .answer-pill.correct { background: #dcfce7; color: #15803d; }
+        .answer-pill.wrong { background: #fee2e2; color: #b91c1c; }
+    </style>
+</head>
+<body class="bg-light">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-cq sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <i class="bi bi-mortarboard-fill text-primary me-2"></i>CampusQuest
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="subjects.html"><i class="bi bi-book me-1"></i>Subjects</a></li>
+                    <li class="nav-item"><a class="nav-link" href="notes.html"><i class="bi bi-journal-text me-1"></i>Notes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="questions.html"><i class="bi bi-collection me-1"></i>Question Bank</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="practice.html"><i class="bi bi-lightning-charge me-1"></i>Practice</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pyqs.html"><i class="bi bi-file-earmark-pdf me-1"></i>PYQs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="mock-tests.html"><i class="bi bi-stopwatch me-1"></i>Mock Tests</a></li>
+                    <li class="nav-item"><a class="nav-link" href="progress.html"><i class="bi bi-graph-up-arrow me-1"></i>Progress</a></li>
+                    <li class="nav-item"><a class="nav-link" href="rankings.html"><i class="bi bi-trophy me-1"></i>Rankings</a></li>
+                    <li class="nav-item"><a class="nav-link" href="ai-assistant.html"><i class="bi bi-stars me-1 text-warning"></i>AI Assistant</a></li>
+                    <li class="nav-item admin-only d-none"><a class="nav-link text-info" href="admin.html"><i class="bi bi-shield-lock me-1"></i>Admin</a></li>
+                </ul>
+                <div id="navbar-user-section"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="container py-4 mb-5">
+        <!-- Loading State -->
+        <div id="result-loading" class="text-center py-5">
+            <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+            <h5 class="fw-semibold text-secondary">Loading practice result...</h5>
+        </div>
+
+        <!-- Result Content (Hidden until loaded) -->
+        <div id="result-content" class="d-none">
+            <!-- Result Banner (Section 9 of Phase 3 Blueprint) -->
+            <div class="result-banner text-center mb-4">
+                <span class="badge bg-white-subtle text-white border border-white-subtle px-3 py-1 rounded-pill mb-3" id="res-subject-badge">
+                    Subject & Unit
+                </span>
+                <h1 class="display-6 fw-bold mb-4" id="res-status-title">PRACTICE RESULT</h1>
+
+                <!-- Score Circle -->
+                <div class="score-circle mb-4" id="res-score-circle">
+                    <span class="display-5 fw-bold" id="res-score-ratio">8 / 10</span>
+                    <span class="small opacity-75 fw-semibold" id="res-percentage">80%</span>
+                </div>
+
+                <!-- Metrics Grid -->
+                <div class="row g-3 justify-content-center mb-4 mx-auto" style="max-width: 600px;">
+                    <div class="col-4">
+                        <div class="p-3 rounded-3 bg-white bg-opacity-10 text-center">
+                            <div class="fs-4 fw-bold text-success" id="res-correct-count">8</div>
+                            <div class="small opacity-75">Correct Answers</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-3 rounded-3 bg-white bg-opacity-10 text-center">
+                            <div class="fs-4 fw-bold text-danger" id="res-wrong-count">2</div>
+                            <div class="small opacity-75">Wrong Answers</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-3 rounded-3 bg-white bg-opacity-10 text-center">
+                            <div class="fs-4 fw-bold text-info" id="res-time-taken">45s</div>
+                            <div class="small opacity-75">Time Taken</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons (Section 9 & 10 Blueprint) -->
+                <div class="d-flex flex-wrap gap-3 justify-content-center">
+                    <a href="#review-section" class="btn btn-light rounded-pill px-4 py-2 fw-bold text-dark shadow-sm">
+                        <i class="bi bi-card-checklist me-1"></i>Review Answers
+                    </a>
+                    <a href="practice.html" id="practice-again-btn" class="btn btn-warning rounded-pill px-4 py-2 fw-bold text-dark shadow-sm">
+                        <i class="bi bi-arrow-repeat me-1"></i>Practice Again
+                    </a>
+                    <button class="btn btn-outline-light rounded-pill px-4 py-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#historyModal">
+                        <i class="bi bi-clock-history me-1"></i>Attempt History
+                    </button>
+                </div>
+            </div>
+
+            <!-- Review Answers Section (Module 8 of Phase 3 Blueprint) -->
+            <section id="review-section" class="mt-5">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h4 class="fw-bold mb-1"><i class="bi bi-card-text text-primary me-2"></i>Review Answers</h4>
+                        <p class="text-muted small mb-0">Learn from mistakes by checking your chosen options against the verified correct answers and detailed explanations</p>
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-secondary active filter-review-btn" data-filter="all">All</button>
+                        <button type="button" class="btn btn-outline-secondary filter-review-btn" data-filter="incorrect">Mistakes Only</button>
+                        <button type="button" class="btn btn-outline-secondary filter-review-btn" data-filter="correct">Correct Only</button>
+                    </div>
+                </div>
+
+                <!-- Question Cards Container -->
+                <div id="review-cards-container" class="d-flex flex-column gap-3">
+                    <!-- Populated by result.js -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Attempt History Modal -->
+    <div class="modal fade" id="historyModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>Your Practice History</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Subject & Unit</th>
+                                    <th>Score</th>
+                                    <th>Percentage</th>
+                                    <th>Date</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                                <tr><td colspan="5" class="text-center py-3 text-muted">Loading history...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 bg-white border-top mt-auto">
+        <div class="container">
+            <p class="mb-0 text-muted small">CampusQuest &copy; 2026. Complete Engineering Preparation Platform.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/result.js"></script>
+</body>
+</html>

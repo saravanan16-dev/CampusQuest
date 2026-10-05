@@ -17,15 +17,35 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Check URL params for pre-selection
     const urlParams = new URLSearchParams(window.location.search);
-    const subjectId = urlParams.get("subjectId");
+    const subjectId = urlParams.get("subjectId") || urlParams.get("subject_id");
+    const unitId = urlParams.get("unitId") || urlParams.get("unit_id");
     const unit = urlParams.get("unit");
+    const diff = urlParams.get("difficulty");
 
     if (subjectId) {
         document.getElementById("setup-subject").value = subjectId;
+        await loadUnits(subjectId);
+        if (unitId) {
+            document.getElementById("setup-unit").value = unitId;
+        } else if (unit) {
+            // Find option matching unit number
+            const opts = document.getElementById("setup-unit").options;
+            for (let i = 0; i < opts.length; i++) {
+                if (opts[i].dataset.unitNumber === String(unit)) {
+                    document.getElementById("setup-unit").selectedIndex = i;
+                    break;
+                }
+            }
+        }
     }
-    if (unit) {
-        document.getElementById("setup-unit").value = unit;
+    if (diff) {
+        document.getElementById("setup-difficulty").value = diff.toUpperCase();
     }
+
+    // Dynamic unit loading on subject change
+    document.getElementById("setup-subject").addEventListener("change", async (e) => {
+        await loadUnits(e.target.value);
+    });
 
     // Count selector buttons
     document.querySelectorAll(".count-btn").forEach(btn => {
@@ -61,11 +81,38 @@ async function loadSubjects() {
     }
 }
 
+async function loadUnits(subjectId) {
+    const select = document.getElementById("setup-unit");
+    if (!subjectId) {
+        select.innerHTML = `<option value="">All Units</option>`;
+        return;
+    }
+
+    try {
+        const res = await API.getUnitsBySubject(subjectId);
+        if (res.success && res.data.length > 0) {
+            select.innerHTML = `<option value="">All Units</option>`;
+            res.data.forEach(u => {
+                const opt = document.createElement("option");
+                opt.value = u.id;
+                opt.dataset.unitNumber = u.unit_number;
+                opt.textContent = `Unit ${u.unit_number}: ${u.name}`;
+                select.appendChild(opt);
+            });
+        }
+    } catch (e) {
+        console.error("Failed to load units:", e);
+    }
+}
+
 async function handleStart(e) {
     e.preventDefault();
 
     const subjectId = document.getElementById("setup-subject").value;
-    const unit = document.getElementById("setup-unit").value;
+    const unitSelect = document.getElementById("setup-unit");
+    const selectedUnitOpt = unitSelect.selectedOptions[0];
+    const unitId = selectedUnitOpt ? selectedUnitOpt.value : "";
+    const unitNum = selectedUnitOpt ? selectedUnitOpt.dataset.unitNumber : "";
     const difficulty = document.getElementById("setup-difficulty").value;
     const count = document.getElementById("setup-count").value;
     const startBtn = document.getElementById("start-btn");
@@ -78,7 +125,8 @@ async function handleStart(e) {
     try {
         const res = await API.startPractice({
             subject_id: subjectId,
-            unit: unit || undefined,
+            unit_id: unitId || undefined,
+            unit: unitNum || undefined,
             difficulty: difficulty || undefined,
             count: Number(count)
         });
@@ -122,19 +170,24 @@ function renderQuestion(index) {
 
     // Question content
     const diffColors = { EASY: "bg-success-subtle text-success", MEDIUM: "bg-warning-subtle text-warning", HARD: "bg-danger-subtle text-danger" };
-    document.getElementById("q-difficulty-badge").className = `badge ${diffColors[q.difficulty] || "bg-secondary-subtle text-secondary"}`;
+    document.getElementById("q-difficulty-badge").className = `badge ${diffColors[q.difficulty?.toUpperCase()] || "bg-secondary-subtle text-secondary"}`;
     document.getElementById("q-difficulty-badge").innerText = q.difficulty;
     document.getElementById("q-topic-badge").innerText = q.topic || "General";
-    document.getElementById("question-text").innerText = q.question_text;
+    document.getElementById("question-text").innerText = q.question || q.question_text;
 
     // Options
+    const defaultKeys = ["A", "B", "C", "D", "E", "F"];
     const optionsContainer = document.getElementById("options-container");
-    optionsContainer.innerHTML = q.options.map(opt => `
-        <div class="quiz-option" data-key="${opt.option_key}" onclick="selectOption(this, '${opt.option_key}')">
-            <span class="option-badge">${opt.option_key}</span>
-            <span>${opt.option_text}</span>
-        </div>
-    `).join("");
+    optionsContainer.innerHTML = (q.options || []).map((opt, optIdx) => {
+        const key = opt.option_key || defaultKeys[optIdx];
+        const optId = opt.id || "";
+        return `
+            <div class="quiz-option" data-key="${key}" data-id="${optId}" onclick="selectOption(this, '${key}', '${optId}')">
+                <span class="option-badge">${key}</span>
+                <span>${opt.option_text}</span>
+            </div>
+        `;
+    }).join("");
 
     // Explanation
     document.getElementById("explanation-box").classList.add("d-none");
@@ -153,25 +206,23 @@ function renderQuestion(index) {
     }, 1000);
 }
 
-function selectOption(el, key) {
+function selectOption(el, key, optId) {
     const allOptions = document.querySelectorAll(".quiz-option");
-    // Prevent re-selection
-    if ([...allOptions].some(o => o.classList.contains("selected") || o.classList.contains("correct") || o.classList.contains("incorrect"))) return;
+    if ([...allOptions].some(o => o.classList.contains("selected"))) return;
 
     allOptions.forEach(o => o.classList.remove("selected"));
     el.classList.add("selected");
 
-    // Record answer & time
     const timeTaken = Math.round((Date.now() - questionStartTime) / 1000);
     questionTimers.push(timeTaken);
 
     const q = currentSession.questions[currentQuestionIndex];
     answersCollected.push({
         question_id: q.id,
+        selected_option_id: optId ? Number(optId) : undefined,
         selected_option: key
     });
 
-    // Update live score
     document.getElementById("next-btn").disabled = false;
 }
 
@@ -193,71 +244,36 @@ async function submitPractice() {
     nextBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Submitting...`;
 
     const totalSeconds = Math.round((Date.now() - sessionStartTime) / 1000);
+    const attemptId = currentSession.attempt_id || currentSession.id;
 
     try {
-        const res = await API.submitPractice(currentSession.attempt_id, {
+        const res = await API.submitPractice(attemptId, {
             answers: answersCollected,
             time_taken_seconds: totalSeconds
         });
 
         if (res.success) {
-            showResultScreen(res.data);
-            showScreen("result-screen");
+            // Option to redirect to result.html or show inline
+            window.location.href = `result.html?attempt_id=${attemptId}`;
         } else {
             Auth.showToast(res.message || "Submission failed", "error");
+            nextBtn.disabled = false;
+            nextBtn.innerText = "Finish & Submit";
         }
     } catch (err) {
         Auth.showToast(err.message || "Failed to submit", "error");
+        nextBtn.disabled = false;
+        nextBtn.innerText = "Finish & Submit";
     }
 }
 
-function showResultScreen(data) {
-    // Score summary
-    const accuracy = data.accuracy;
-    const emoji = accuracy >= 90 ? "🏆" : accuracy >= 70 ? "🎯" : accuracy >= 50 ? "👍" : "💪";
-    const title = accuracy >= 90 ? "Outstanding!" : accuracy >= 70 ? "Great Job!" : accuracy >= 50 ? "Good Effort!" : "Keep Practicing!";
-    const subtitle = `You answered ${data.correct_answers}/${data.total_questions} correctly in this session.`;
-
-    document.getElementById("result-emoji").innerText = emoji;
-    document.getElementById("result-title").innerText = title;
-    document.getElementById("result-subtitle").innerText = subtitle;
-    document.getElementById("res-correct").innerText = data.correct_answers;
-    document.getElementById("res-wrong").innerText = data.incorrect_answers;
-    document.getElementById("res-accuracy").innerText = `${data.accuracy}%`;
-    document.getElementById("res-xp-earned").innerText = `+${data.xp_earned} XP Earned!`;
-    document.getElementById("res-total-xp").innerText = `Total: ${data.total_xp} XP | Level ${data.level_info?.level || "--"} (${data.level_info?.title || ""})`;
-
-    // New achievements
-    if (data.new_achievements && data.new_achievements.length > 0) {
-        const achBox = document.getElementById("new-achievements-box");
-        const achList = document.getElementById("new-achievements-list");
-        achBox.classList.remove("d-none");
-        achList.innerHTML = data.new_achievements.map(a => `
-            <div class="badge bg-warning text-dark p-2 d-flex align-items-center gap-1">
-                <i class="bi bi-trophy-fill"></i> ${a.title}
-            </div>
-        `).join("");
-    }
-
-    // Detailed answer review
-    const container = document.getElementById("result-answers-container");
-    container.innerHTML = data.results.map((ans, i) => {
-        const isCorrect = ans.is_correct;
-        return `
-            <div class="border rounded-3 p-3 ${isCorrect ? 'border-success bg-success-subtle' : 'border-danger bg-danger-subtle'}">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <span class="fw-semibold small text-dark">Q${i + 1}: ${ans.topic}</span>
-                    <span class="badge ${isCorrect ? 'bg-success' : 'bg-danger'}">${isCorrect ? '✓ Correct' : '✗ Wrong'}</span>
-                </div>
-                <p class="mb-2 small">${ans.question_text}</p>
-                <div class="small">
-                    <span class="text-muted">Your answer:</span> <strong class="${isCorrect ? 'text-success' : 'text-danger'}">${ans.selected_option || "Not answered"}</strong>
-                    ${!isCorrect ? `&nbsp;|&nbsp; <span class="text-muted">Correct:</span> <strong class="text-success">${ans.correct_answer}</strong>` : ""}
-                </div>
-                ${ans.explanation ? `<div class="mt-2 small text-muted border-top pt-2"><i class="bi bi-lightbulb-fill text-warning me-1"></i>${ans.explanation}</div>` : ""}
-            </div>
-        `;
-    }).join("");
+function showScreen(id) {
+    ["setup-screen", "quiz-screen", "result-screen"].forEach(s => {
+        const el = document.getElementById(s);
+        if (el) el.classList.add("d-none");
+    });
+    const target = document.getElementById(id);
+    if (target) target.classList.remove("d-none");
 }
 
 function resetPractice() {
@@ -266,13 +282,6 @@ function resetPractice() {
     answersCollected = [];
     if (timerInterval) clearInterval(timerInterval);
     showScreen("setup-screen");
-}
-
-function showScreen(id) {
-    ["setup-screen", "quiz-screen", "result-screen"].forEach(s => {
-        document.getElementById(s).classList.add("d-none");
-    });
-    document.getElementById(id).classList.remove("d-none");
 }
 
 window.selectOption = selectOption;

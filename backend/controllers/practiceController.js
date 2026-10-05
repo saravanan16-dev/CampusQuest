@@ -2,7 +2,7 @@ const practiceService = require("../services/practiceService");
 
 const startPractice = async (req, res) => {
     try {
-        const { subject_id, subjectId, unit, difficulty, count } = req.body;
+        const { subject_id, subjectId, unit, unit_id, unitId, difficulty, count } = req.body;
         const targetSubjectId = subject_id || subjectId;
 
         if (!targetSubjectId) {
@@ -14,7 +14,10 @@ const startPractice = async (req, res) => {
 
         const data = await practiceService.startPractice({
             userId: req.user.id,
+            subject_id: targetSubjectId,
             subjectId: targetSubjectId,
+            unit_id: unit_id || unitId,
+            unitId: unit_id || unitId,
             unit,
             difficulty,
             count: count || 5
@@ -35,8 +38,15 @@ const startPractice = async (req, res) => {
 
 const submitPractice = async (req, res) => {
     try {
-        const attemptId = req.params.id;
+        const attemptId = req.params.id || req.body.attempt_id || req.body.practice_attempt_id || req.body.id;
         const { answers, time_taken_seconds } = req.body;
+
+        if (!attemptId) {
+            return res.status(400).json({
+                success: false,
+                message: "attempt_id is required"
+            });
+        }
 
         if (!answers || !Array.isArray(answers)) {
             return res.status(400).json({
@@ -67,7 +77,8 @@ const submitPractice = async (req, res) => {
 
 const getPracticeResult = async (req, res) => {
     try {
-        const data = await practiceService.getPracticeResult(req.params.id, req.user.id);
+        const attemptId = req.params.id || req.query.attempt_id || req.params.attemptId;
+        const data = await practiceService.getPracticeResult(attemptId, req.user.id);
         res.json({
             success: true,
             data
