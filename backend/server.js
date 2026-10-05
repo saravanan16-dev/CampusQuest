@@ -7,8 +7,10 @@ const db = require("./config/db");
 const initDatabase = require("./config/initDb");
 
 // Import Routes
+const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/authRoutes");
 const subjectRoutes = require("./routes/subjectRoutes");
+const unitRoutes = require("./routes/unitRoutes");
 const noteRoutes = require("./routes/noteRoutes");
 const questionRoutes = require("./routes/questionRoutes");
 const practiceRoutes = require("./routes/practiceRoutes");
@@ -42,8 +44,10 @@ app.get("/api/health", (req, res) => {
 });
 
 // Mount Routes
+app.use("/", userRoutes);
 app.use("/", authRoutes);
 app.use("/", subjectRoutes);
+app.use("/", unitRoutes);
 app.use("/", noteRoutes);
 app.use("/", questionRoutes);
 app.use("/", practiceRoutes);

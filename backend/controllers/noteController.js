@@ -1,16 +1,19 @@
 const noteService = require("../services/noteService");
 
-const getNotesBySubject = async (req, res) => {
+const getAllNotes = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { unit } = req.query;
-        const notes = await noteService.getNotesBySubject(id, unit);
+        const { subject_id, subjectId, unit_id, unitId, unit } = req.query;
+        const notes = await noteService.getAllNotes({
+            subject_id: subject_id || subjectId,
+            unit_id: unit_id || unitId,
+            unit
+        });
         res.json({
             success: true,
             data: notes
         });
     } catch (error) {
-        console.error("Get notes by subject error:", error.message);
+        console.error("Get all notes error:", error.message);
         res.status(500).json({
             success: false,
             message: "Database error while fetching notes"
@@ -18,15 +21,21 @@ const getNotesBySubject = async (req, res) => {
     }
 };
 
-const getAllNotes = async (req, res) => {
+const getNotesBySubject = async (req, res) => {
     try {
-        const notes = await noteService.getAllNotes();
+        const { id } = req.params;
+        const { unit, unit_id } = req.query;
+        const notes = await noteService.getAllNotes({
+            subject_id: id,
+            unit_id,
+            unit
+        });
         res.json({
             success: true,
             data: notes
         });
     } catch (error) {
-        console.error("Get all notes error:", error.message);
+        console.error("Get notes by subject error:", error.message);
         res.status(500).json({
             success: false,
             message: "Database error while fetching notes"
@@ -58,30 +67,31 @@ const getNote = async (req, res) => {
 
 const createNote = async (req, res) => {
     try {
-        const { subject_id, title, description, unit, file_url, content } = req.body;
+        const { subject_id, subjectId, unit_id, unitId, title, description, unit, file_url, content } = req.body || {};
 
-        if (!subject_id || !title || !unit) {
+        const targetSubjectId = subject_id || subjectId;
+        if (!targetSubjectId || !title) {
             return res.status(400).json({
                 success: false,
-                message: "Subject ID, title, and unit are required"
+                message: "subject_id and title are required"
             });
         }
 
         const uploaded_by = req.user ? req.user.id : null;
-        const id = await noteService.createNote({
-            subject_id,
+        const note = await noteService.createNote({
+            subject_id: Number(targetSubjectId),
+            unit_id: unit_id || unitId ? Number(unit_id || unitId) : null,
             title,
             description,
-            unit,
+            unit: unit ? Number(unit) : 1,
             file_url,
             content,
             uploaded_by
         });
 
-        const created = await noteService.getNoteById(id);
         res.status(201).json({
             success: true,
-            data: created
+            data: note
         });
     } catch (error) {
         console.error("Create note error:", error.message);
@@ -94,23 +104,23 @@ const createNote = async (req, res) => {
 
 const updateNote = async (req, res) => {
     try {
-        const { title, description, unit, file_url, content } = req.body;
-        const result = await noteService.updateNote(req.params.id, {
+        const { title, description, unit_id, unit, file_url, content } = req.body;
+        const updated = await noteService.updateNote(req.params.id, {
             title,
             description,
+            unit_id,
             unit,
             file_url,
             content
         });
 
-        if (result.affectedRows === 0) {
+        if (!updated) {
             return res.status(404).json({
                 success: false,
                 message: "Note not found"
             });
         }
 
-        const updated = await noteService.getNoteById(req.params.id);
         res.json({
             success: true,
             data: updated
@@ -148,8 +158,8 @@ const deleteNote = async (req, res) => {
 };
 
 module.exports = {
-    getNotesBySubject,
     getAllNotes,
+    getNotesBySubject,
     getNote,
     createNote,
     updateNote,

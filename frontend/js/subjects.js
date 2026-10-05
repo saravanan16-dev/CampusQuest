@@ -42,17 +42,14 @@ async function loadSubjects(semester = "") {
                         </p>
                         
                         <div class="d-flex flex-wrap gap-2 pt-3 border-top mt-3">
-                            <a href="notes.html?subjectId=${sub.id}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                                <i class="bi bi-journal-text me-1"></i>Notes
+                            <a href="subject.html?id=${sub.id}" class="btn btn-sm btn-primary rounded-pill px-3">
+                                <i class="bi bi-diagram-3 me-1"></i>Units & Notes
                             </a>
-                            <a href="practice.html?subjectId=${sub.id}" class="btn btn-sm btn-primary rounded-pill px-3">
+                            <a href="practice.html?subjectId=${sub.id}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                                 <i class="bi bi-lightning-charge me-1"></i>Practice
                             </a>
                             <a href="pyqs.html?subjectId=${sub.id}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
                                 <i class="bi bi-file-earmark-pdf me-1"></i>PYQs
-                            </a>
-                            <a href="ai-assistant.html?subjectId=${sub.id}" class="btn btn-sm btn-warning rounded-pill px-2.5" title="Exam Intelligence">
-                                <i class="bi bi-stars"></i>
                             </a>
                         </div>
                     </div>

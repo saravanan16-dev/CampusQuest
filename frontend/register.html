@@ -97,11 +97,13 @@
             try {
                 const res = await API.register({ name, username, email, role, password });
                 if (res.success) {
-                    API.setToken(res.data.token);
-                    API.setUser(res.data.user);
+                    const token = res.token || res.data?.token;
+                    const user = res.data?.user || res.data;
+                    API.setToken(token);
+                    API.setUser(user);
                     Auth.showToast("Account created successfully! Welcome bonus +50 XP awarded.", "success");
                     setTimeout(() => {
-                        window.location.href = res.data.user.role === 'ADMIN' ? 'admin.html' : 'dashboard.html';
+                        window.location.href = user.role === 'ADMIN' ? 'admin.html' : 'dashboard.html';
                     }, 500);
                 } else {
                     errorAlert.innerText = res.message || "Registration failed";

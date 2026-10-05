@@ -93,12 +93,13 @@ function renderNotes(notes) {
             <div class="card-cq h-100 p-4 d-flex flex-column">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <span class="badge bg-primary text-white rounded-pill px-2.5 py-1">
-                        Unit ${n.unit}
+                        Unit ${n.unit_number || n.unit}
                     </span>
                     <span class="badge bg-light text-muted border">
                         ${n.subject_name}
                     </span>
                 </div>
+                ${n.unit_name ? `<small class="text-primary fw-semibold mb-1 d-block">${n.unit_name}</small>` : ''}
                 <h5 class="fw-bold text-dark mb-2">${n.title}</h5>
                 <p class="text-muted small flex-grow-1">
                     ${n.description || "In-depth conceptual guide with key formulas, diagrams, and exam revision highlights."}

@@ -1,5 +1,4 @@
-const jwt = require("jsonwebtoken");
-require("dotenv").config({ path: __dirname + "/../.env" });
+const { verifyToken } = require("../utils/jwt");
 
 const authMiddleware = (req, res, next) => {
     try {
@@ -12,9 +11,14 @@ const authMiddleware = (req, res, next) => {
         }
 
         const token = authHeader.split(" ")[1];
-        const secret = process.env.JWT_SECRET || "campusquest_super_secret_jwt_key_2026_dev_prod";
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized: Access token missing"
+            });
+        }
 
-        const decoded = jwt.verify(token, secret);
+        const decoded = verifyToken(token);
         req.user = decoded;
         next();
     } catch (error) {

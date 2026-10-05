@@ -1,11 +1,11 @@
 const noteModel = require("../models/noteModel");
 
-const getNotesBySubject = async (subjectId, unit) => {
-    return await noteModel.getNotesBySubject(subjectId, unit);
+const getAllNotes = async (filters = {}) => {
+    return await noteModel.getAllNotes(filters);
 };
 
-const getAllNotes = async () => {
-    return await noteModel.getAllNotes();
+const getNotesBySubject = async (subjectId, unit) => {
+    return await noteModel.getNotesBySubject(subjectId, unit);
 };
 
 const getNoteById = async (id) => {
@@ -13,11 +13,13 @@ const getNoteById = async (id) => {
 };
 
 const createNote = async (noteData) => {
-    return await noteModel.createNote(noteData);
+    const id = await noteModel.createNote(noteData);
+    return await noteModel.getNoteById(id);
 };
 
 const updateNote = async (id, noteData) => {
-    return await noteModel.updateNote(id, noteData);
+    await noteModel.updateNote(id, noteData);
+    return await noteModel.getNoteById(id);
 };
 
 const deleteNote = async (id) => {
@@ -25,8 +27,8 @@ const deleteNote = async (id) => {
 };
 
 module.exports = {
-    getNotesBySubject,
     getAllNotes,
+    getNotesBySubject,
     getNoteById,
     createNote,
     updateNote,

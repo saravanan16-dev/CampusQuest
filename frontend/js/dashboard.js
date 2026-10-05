@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
         await Promise.all([
+            loadLearningNavigator(),
             loadUserProfileAndStats(),
             loadProgressAndWeakAreas(),
             loadRecentActivity(),
@@ -251,3 +252,143 @@ async function loadLeaderboardPreview() {
         console.error("Error loading leaderboard preview:", e);
     }
 }
+
+async function loadLearningNavigator() {
+    try {
+        const dashRes = await API.getDashboard();
+        if (dashRes.success) {
+            const subCountEl = document.getElementById("nav-subjects-count");
+            const noteCountEl = document.getElementById("nav-notes-count");
+            if (subCountEl) subCountEl.innerText = `${dashRes.subjects_count} Subjects`;
+            if (noteCountEl) noteCountEl.innerText = `${dashRes.notes_count} Notes`;
+
+            const subjects = dashRes.subjects || [];
+            const listEl = document.getElementById("nav-subject-list");
+            if (!listEl) return;
+
+            if (subjects.length > 0) {
+                listEl.innerHTML = subjects.map((s, idx) => `
+                    <button type="button" class="list-group-item list-group-item-action ${idx === 0 ? 'active' : ''} d-flex justify-content-between align-items-center"
+                            onclick="selectNavSubject(${s.id}, this)">
+                        <div class="text-truncate">
+                            <div class="fw-semibold text-truncate">${s.name}</div>
+                            <small class="opacity-75">Semester ${s.semester}</small>
+                        </div>
+                        <i class="bi bi-chevron-right ms-2 small"></i>
+                    </button>
+                `).join("");
+
+                // Automatically load units for first subject
+                selectNavSubject(subjects[0].id, listEl.children[0]);
+            } else {
+                listEl.innerHTML = `<div class="text-center py-3 text-muted small">No subjects available.</div>`;
+            }
+        }
+    } catch (e) {
+        console.error("Error loading learning navigator:", e);
+    }
+}
+
+async function selectNavSubject(subjectId, el) {
+    document.querySelectorAll("#nav-subject-list .list-group-item").forEach(b => b.classList.remove("active"));
+    if (el) el.classList.add("active");
+
+    const unitList = document.getElementById("nav-unit-list");
+    const notesList = document.getElementById("nav-notes-list");
+    if (!unitList) return;
+
+    unitList.innerHTML = `<div class="text-center py-3 text-muted small"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading units...</div>`;
+    if (notesList) notesList.innerHTML = `<div class="text-center py-3 text-muted small">Select a unit to view notes</div>`;
+
+    try {
+        const res = await API.getUnitsBySubject(subjectId);
+        if (res.success && res.data.length > 0) {
+            unitList.innerHTML = res.data.map((u, idx) => `
+                <button type="button" class="list-group-item list-group-item-action ${idx === 0 ? 'active' : ''} d-flex justify-content-between align-items-center"
+                        onclick="selectNavUnit(${subjectId}, ${u.id}, this)">
+                    <div class="text-truncate">
+                        <span class="badge bg-secondary rounded-pill me-1" style="font-size: 0.7rem;">Unit ${u.unit_number}</span>
+                        <span class="fw-semibold small text-truncate">${u.name}</span>
+                    </div>
+                    <span class="badge bg-light text-dark border rounded-pill">${u.notes_count || 0}</span>
+                </button>
+            `).join("");
+
+            // Automatically load notes for first unit
+            selectNavUnit(subjectId, res.data[0].id, unitList.children[0]);
+        } else {
+            unitList.innerHTML = `<div class="text-center py-3 text-muted small">No units configured for this subject.</div>`;
+        }
+    } catch (e) {
+        unitList.innerHTML = `<div class="text-center py-3 text-danger small">Failed to load units.</div>`;
+    }
+}
+window.selectNavSubject = selectNavSubject;
+
+async function selectNavUnit(subjectId, unitId, el) {
+    document.querySelectorAll("#nav-unit-list .list-group-item").forEach(b => b.classList.remove("active"));
+    if (el) el.classList.add("active");
+
+    const notesList = document.getElementById("nav-notes-list");
+    if (!notesList) return;
+
+    notesList.innerHTML = `<div class="text-center py-3 text-muted small"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading notes...</div>`;
+
+    try {
+        const res = await API.getAllNotes({ subject_id: subjectId, unit_id: unitId });
+        if (res.success && res.data.length > 0) {
+            notesList.innerHTML = res.data.map(n => `
+                <div class="p-2.5 rounded bg-light border">
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <h6 class="fw-bold text-dark mb-0 small text-truncate" style="max-width: 170px;">${n.title}</h6>
+                        <span class="badge bg-primary rounded-pill" style="font-size: 0.65rem;">Unit ${n.unit_number || n.unit}</span>
+                    </div>
+                    <p class="text-muted small mb-2 text-truncate" style="font-size: 0.75rem;">${n.description || "Comprehensive syllabus notes"}</p>
+                    <div class="d-flex gap-1">
+                        <button class="btn btn-sm btn-primary rounded-pill flex-grow-1 py-0.5" style="font-size: 0.72rem;" onclick="openDashNote(${n.id})">
+                            <i class="bi bi-book-half me-1"></i>Read
+                        </button>
+                        ${n.file_url ? `
+                            <a href="${n.file_url}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-0.5" style="font-size: 0.72rem;">
+                                <i class="bi bi-download"></i>
+                            </a>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join("");
+        } else {
+            notesList.innerHTML = `
+                <div class="text-center py-3 text-muted small">
+                    <i class="bi bi-journal-x d-block mb-1 fs-5 text-secondary"></i>
+                    No notes for this unit yet.
+                </div>
+            `;
+        }
+    } catch (e) {
+        notesList.innerHTML = `<div class="text-center py-3 text-danger small">Failed to load notes.</div>`;
+    }
+}
+window.selectNavUnit = selectNavUnit;
+
+async function openDashNote(noteId) {
+    try {
+        const res = await API.getNote(noteId);
+        if (res.success) {
+            const note = res.data;
+            document.getElementById("dash-modal-note-title").innerText = note.title;
+            document.getElementById("dash-modal-note-badge").innerText = `Unit ${note.unit_number || note.unit}: ${note.subject_name}`;
+            document.getElementById("dash-modal-note-content").innerText = note.content || note.description || "Note content preview.";
+            const dl = document.getElementById("dash-modal-note-download");
+            if (note.file_url) {
+                dl.href = note.file_url;
+                dl.classList.remove("d-none");
+            } else {
+                dl.classList.add("d-none");
+            }
+            new bootstrap.Modal(document.getElementById("dashNoteModal")).show();
+        }
+    } catch (e) {
+        Auth.showToast("Could not load note", "error");
+    }
+}
+window.openDashNote = openDashNote;

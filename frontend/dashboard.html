@@ -121,6 +121,46 @@
             </div>
         </div>
 
+        <!-- Phase 2 Learning Navigator: Subject -> Units -> Notes -->
+        <div class="card-cq p-4 mb-4 border-primary shadow-sm bg-white">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-diagram-3-fill text-primary me-2"></i>Curriculum Learning Navigator</h5>
+                    <small class="text-muted">Target Flow: Subject &rarr; Units &rarr; Notes</small>
+                </div>
+                <div class="d-flex gap-2 mt-2 mt-sm-0">
+                    <span class="badge bg-primary rounded-pill px-3 py-1.5" id="nav-subjects-count">6 Subjects</span>
+                    <span class="badge bg-success rounded-pill px-3 py-1.5" id="nav-notes-count">6 Notes</span>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <!-- Step 1: Subjects List -->
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold text-muted"><i class="bi bi-1-circle-fill text-primary me-1"></i>Select Subject</label>
+                    <div class="list-group" id="nav-subject-list" style="max-height: 280px; overflow-y: auto;">
+                        <div class="text-center py-3 text-muted small">Loading subjects...</div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Units for Selected Subject -->
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold text-muted"><i class="bi bi-2-circle-fill text-info me-1"></i>Select Unit</label>
+                    <div class="list-group" id="nav-unit-list" style="max-height: 280px; overflow-y: auto;">
+                        <div class="text-center py-3 text-muted small">Select a subject on the left</div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Notes for Selected Unit -->
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold text-muted"><i class="bi bi-3-circle-fill text-success me-1"></i>Learning Notes</label>
+                    <div id="nav-notes-list" class="d-flex flex-column gap-2" style="max-height: 280px; overflow-y: auto;">
+                        <div class="text-center py-3 text-muted small">Select a unit to view notes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row g-4">
             <!-- Left Column: Subject Progress & Weak Areas -->
             <div class="col-lg-8">
@@ -207,6 +247,28 @@
                     <div id="leaderboard-preview" class="d-flex flex-column gap-2">
                         <!-- Populated dynamically -->
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Reader Modal -->
+    <div class="modal fade" id="dashNoteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white">
+                    <div>
+                        <span class="badge bg-primary rounded-pill mb-1" id="dash-modal-note-badge">Unit 1</span>
+                        <h5 class="modal-title fw-bold" id="dash-modal-note-title">Note Title</h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="dash-modal-note-content" class="lh-lg" style="white-space: pre-wrap;"></div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <a href="#" id="dash-modal-note-download" class="btn btn-outline-primary rounded-pill" target="_blank">Download PDF</a>
+                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>

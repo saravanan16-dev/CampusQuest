@@ -78,6 +78,9 @@
         <div class="tab-content" id="subject-tab-content">
             <!-- Notes Tab -->
             <div class="tab-pane fade show active" id="tab-sub-notes" role="tabpanel">
+                <div class="d-flex flex-wrap gap-2 mb-4" id="subject-units-pill-container">
+                    <!-- Populated by JS -->
+                </div>
                 <div class="row g-4" id="subject-notes-container">
                     <div class="col-12 text-center py-5 text-muted">
                         <div class="spinner-border text-primary" role="status"></div>
@@ -162,25 +165,23 @@
                     document.getElementById("subject-sem-badge").innerText = `Semester ${sub.semester || 1}`;
                 }
 
-                // 2. Fetch Notes
-                const notesRes = await API.getNotes(subjectId);
-                const notesContainer = document.getElementById("subject-notes-container");
-                if (notesRes.success && notesRes.data.length > 0) {
-                    notesContainer.innerHTML = notesRes.data.map(n => `
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card-cq h-100 p-4 d-flex flex-column">
-                                <span class="badge bg-primary text-white rounded-pill px-2.5 py-1 align-self-start mb-2">Unit ${n.unit}</span>
-                                <h6 class="fw-bold text-dark mb-2">${n.title}</h6>
-                                <p class="text-muted small flex-grow-1">${n.description || ""}</p>
-                                <button class="btn btn-sm btn-outline-primary rounded-pill mt-3" onclick="openSubjectNote(${n.id})">
-                                    Read Note
-                                </button>
-                            </div>
-                        </div>
+                // 2. Fetch Units & render filter pills
+                const unitsRes = await API.getUnitsBySubject(subjectId);
+                const unitsContainer = document.getElementById("subject-units-pill-container");
+                if (unitsRes.success && unitsRes.data.length > 0) {
+                    unitsContainer.innerHTML = `
+                        <button class="btn btn-sm btn-primary rounded-pill px-3 unit-pill-btn active" onclick="loadSubjectNotesFiltered(${subjectId}, '', this)">
+                            All Units
+                        </button>
+                    ` + unitsRes.data.map(u => `
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 unit-pill-btn" onclick="loadSubjectNotesFiltered(${subjectId}, ${u.unit_number}, this)">
+                            Unit ${u.unit_number}: ${u.name}
+                        </button>
                     `).join("");
-                } else {
-                    notesContainer.innerHTML = `<div class="col-12 text-center py-5 text-muted">No notes uploaded for this subject yet.</div>`;
                 }
+
+                // Initial notes load
+                await loadSubjectNotesFiltered(subjectId);
 
                 // 3. Fetch PYQs
                 const pyqRes = await API.getPYQs({ subjectId });
@@ -225,6 +226,43 @@
                 console.error("Error loading subject hub:", err);
             }
         });
+
+        async function loadSubjectNotesFiltered(subjectId, unit = '', btnEl = null) {
+            if (btnEl) {
+                document.querySelectorAll(".unit-pill-btn").forEach(b => {
+                    b.classList.remove("btn-primary", "active");
+                    b.classList.add("btn-outline-secondary");
+                });
+                btnEl.classList.add("btn-primary", "active");
+                btnEl.classList.remove("btn-outline-secondary");
+            }
+
+            const notesContainer = document.getElementById("subject-notes-container");
+            notesContainer.innerHTML = `<div class="col-12 text-center py-5 text-muted"><div class="spinner-border text-primary" role="status"></div><div class="mt-2">Loading notes...</div></div>`;
+
+            try {
+                const notesRes = await API.getNotes(subjectId, unit);
+                if (notesRes.success && notesRes.data.length > 0) {
+                    notesContainer.innerHTML = notesRes.data.map(n => `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card-cq h-100 p-4 d-flex flex-column">
+                                <span class="badge bg-primary text-white rounded-pill px-2.5 py-1 align-self-start mb-2">Unit ${n.unit_number || n.unit}</span>
+                                <h6 class="fw-bold text-dark mb-2">${n.title}</h6>
+                                <p class="text-muted small flex-grow-1">${n.description || ""}</p>
+                                <button class="btn btn-sm btn-outline-primary rounded-pill mt-3" onclick="openSubjectNote(${n.id})">
+                                    Read Note
+                                </button>
+                            </div>
+                        </div>
+                    `).join("");
+                } else {
+                    notesContainer.innerHTML = `<div class="col-12 text-center py-5 text-muted">No notes uploaded for this unit yet.</div>`;
+                }
+            } catch (e) {
+                notesContainer.innerHTML = `<div class="col-12 text-center py-5 text-danger">Failed to load notes.</div>`;
+            }
+        }
+        window.loadSubjectNotesFiltered = loadSubjectNotesFiltered;
 
         async function openSubjectNote(id) {
             try {

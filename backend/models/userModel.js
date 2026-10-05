@@ -12,31 +12,39 @@ const findByUsername = async (username) => {
 
 const findById = async (id) => {
     const [rows] = await db.query(
-        "SELECT id, username, name, email, role, created_at, updated_at FROM users WHERE id = ?",
+        "SELECT id, username, name, email, role, college, department, year, semester, created_at, updated_at FROM users WHERE id = ?",
         [id]
     );
     return rows[0];
 };
 
-const createUser = async ({ username, name, email, password, role = "STUDENT" }) => {
+const createUser = async ({ username, name, email, password, role = "STUDENT", college = null, department = null, year = null, semester = null }) => {
     const [result] = await db.query(
-        "INSERT INTO users (username, name, email, password, role) VALUES (?, ?, ?, ?, ?)",
-        [username, name, email, password, role]
+        `INSERT INTO users (username, name, email, password, role, college, department, year, semester) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [username, name, email, password, role, college, department, year, semester]
     );
     return result.insertId;
 };
 
-const updateUser = async (id, { name, email }) => {
+const updateUser = async (id, { name, email, college, department, year, semester }) => {
     const [result] = await db.query(
-        "UPDATE users SET name = COALESCE(?, name), email = COALESCE(?, email) WHERE id = ?",
-        [name, email, id]
+        `UPDATE users 
+         SET name = COALESCE(?, name), 
+             email = COALESCE(?, email),
+             college = COALESCE(?, college),
+             department = COALESCE(?, department),
+             year = COALESCE(?, year),
+             semester = COALESCE(?, semester)
+         WHERE id = ?`,
+        [name, email, college, department, year, semester, id]
     );
     return result;
 };
 
 const getAllUsers = async () => {
     const [rows] = await db.query(
-        "SELECT id, username, name, email, role, created_at FROM users ORDER BY created_at DESC"
+        "SELECT id, username, name, email, role, college, department, year, semester, created_at FROM users ORDER BY created_at DESC"
     );
     return rows;
 };

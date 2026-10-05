@@ -97,6 +97,11 @@ const API = {
         });
     },
 
+    // Student Dashboard (Phase 2 Section 10)
+    getDashboard() {
+        return this.request("/dashboard");
+    },
+
     // Subjects
     getSubjects(semester = "") {
         const query = semester ? `?semester=${semester}` : "";
@@ -127,14 +132,53 @@ const API = {
         });
     },
 
-    // Notes
+    // Units (Phase 2 Section 7: Subject -> Units)
+    getUnits(subjectId = "") {
+        const query = subjectId ? `?subject_id=${subjectId}` : "";
+        return this.request(`/units${query}`);
+    },
+
+    getUnit(id) {
+        return this.request(`/units/${id}`);
+    },
+
+    getUnitsBySubject(subjectId) {
+        return this.request(`/subjects/${subjectId}/units`);
+    },
+
+    createUnit(unitData) {
+        return this.request("/units", {
+            method: "POST",
+            body: JSON.stringify(unitData)
+        });
+    },
+
+    updateUnit(id, unitData) {
+        return this.request(`/units/${id}`, {
+            method: "PUT",
+            body: JSON.stringify(unitData)
+        });
+    },
+
+    deleteUnit(id) {
+        return this.request(`/units/${id}`, {
+            method: "DELETE"
+        });
+    },
+
+    // Notes (Phase 2 Section 8 & 9: Subject -> Unit -> Notes)
     getNotes(subjectId, unit = "") {
         const query = unit ? `?unit=${unit}` : "";
         return this.request(`/subjects/${subjectId}/notes${query}`);
     },
 
-    getAllNotes() {
-        return this.request("/notes");
+    getAllNotes(filters = {}) {
+        const params = new URLSearchParams();
+        if (filters.subject_id || filters.subjectId) params.append("subject_id", filters.subject_id || filters.subjectId);
+        if (filters.unit_id || filters.unitId) params.append("unit_id", filters.unit_id || filters.unitId);
+        if (filters.unit) params.append("unit", filters.unit);
+        const query = params.toString() ? `?${params.toString()}` : "";
+        return this.request(`/notes${query}`);
     },
 
     getNote(id) {

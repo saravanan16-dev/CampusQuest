@@ -19,6 +19,22 @@ const initDatabase = async () => {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         `);
 
+        // Check and expand users table if college, department, year, semester don't exist
+        const [userCols] = await db.query("SHOW COLUMNS FROM users");
+        const userColNames = userCols.map(c => c.Field);
+        if (!userColNames.includes("college")) {
+            await db.query("ALTER TABLE users ADD COLUMN college VARCHAR(150) NULL AFTER email");
+        }
+        if (!userColNames.includes("department")) {
+            await db.query("ALTER TABLE users ADD COLUMN department VARCHAR(100) NULL AFTER college");
+        }
+        if (!userColNames.includes("year")) {
+            await db.query("ALTER TABLE users ADD COLUMN year INT NULL AFTER department");
+        }
+        if (!userColNames.includes("semester")) {
+            await db.query("ALTER TABLE users ADD COLUMN semester INT NULL AFTER year");
+        }
+
         // 2. subjects table - check if description and semester columns exist
         await db.query(`
             CREATE TABLE IF NOT EXISTS subjects (
@@ -43,22 +59,49 @@ const initDatabase = async () => {
             await db.query("ALTER TABLE subjects ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
         }
 
-        // 3. notes table
+        // 3. units table (Phase 2: Subject -> Units)
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS units (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                subject_id INT NOT NULL,
+                unit_number INT NOT NULL,
+                name VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE,
+                INDEX idx_subject_unit (subject_id, unit_number)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        `);
+
+        // 4. notes table (Phase 2: Subject -> Unit -> Notes)
         await db.query(`
             CREATE TABLE IF NOT EXISTS notes (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 subject_id INT NOT NULL,
+                unit_id INT NULL,
                 title VARCHAR(255) NOT NULL,
                 description TEXT,
-                unit INT NOT NULL,
+                unit INT NOT NULL DEFAULT 1,
                 file_url VARCHAR(500),
                 content LONGTEXT,
                 uploaded_by INT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE,
+                FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE SET NULL,
                 FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         `);
+
+        // Check if unit_id exists in notes
+        const [noteCols] = await db.query("SHOW COLUMNS FROM notes");
+        const noteColNames = noteCols.map(c => c.Field);
+        if (!noteColNames.includes("unit_id")) {
+            await db.query("ALTER TABLE notes ADD COLUMN unit_id INT NULL AFTER subject_id");
+            try {
+                await db.query("ALTER TABLE notes ADD CONSTRAINT fk_notes_unit FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE SET NULL");
+            } catch (e) {
+                // Ignore if constraint exists
+            }
+        }
 
         // 4. questions table
         await db.query(`
@@ -341,6 +384,76 @@ const initDatabase = async () => {
         const subMap = {};
         allSubs.forEach(s => { subMap[s.name] = s.id; });
 
+        // SEED UNITS FOR SUBJECTS (Phase 2: Subject -> Units)
+        const sampleUnitsBySubject = {
+            "Database Management Systems": [
+                { unit_number: 1, name: "Introduction to DBMS & Relational Model" },
+                { unit_number: 2, name: "SQL & Relational Algebra" },
+                { unit_number: 3, name: "Normalization & Functional Dependencies" },
+                { unit_number: 4, name: "Transactions & Concurrency Control" },
+                { unit_number: 5, name: "Storage, Indexing & Query Processing" }
+            ],
+            "Operating Systems": [
+                { unit_number: 1, name: "OS Principles & Process Management" },
+                { unit_number: 2, name: "CPU Scheduling & Synchronization" },
+                { unit_number: 3, name: "Deadlocks & Memory Management" },
+                { unit_number: 4, name: "Virtual Memory & Paging" },
+                { unit_number: 5, name: "File Systems & Mass Storage" }
+            ],
+            "Computer Networks": [
+                { unit_number: 1, name: "Physical Layer & Media" },
+                { unit_number: 2, name: "Data Link Layer & MAC" },
+                { unit_number: 3, name: "Network Layer & IP Routing" },
+                { unit_number: 4, name: "Transport Layer Protocols" },
+                { unit_number: 5, name: "Application Layer & Security" }
+            ],
+            "Java Programming": [
+                { unit_number: 1, name: "OOP Concepts & Core Java" },
+                { unit_number: 2, name: "Java Collections & Generics" },
+                { unit_number: 3, name: "Multithreading & Concurrency" },
+                { unit_number: 4, name: "Exception Handling & I/O Streams" },
+                { unit_number: 5, name: "Lambda Expressions & Modern Java" }
+            ],
+            "Data Structures & Algorithms": [
+                { unit_number: 1, name: "Linear Structures: Arrays & Linked Lists" },
+                { unit_number: 2, name: "Stacks, Queues & Recursion" },
+                { unit_number: 3, name: "Trees & Binary Search Trees" },
+                { unit_number: 4, name: "Graphs & Traversal Algorithms" },
+                { unit_number: 5, name: "Sorting, Searching & Hashing" }
+            ],
+            "Artificial Intelligence": [
+                { unit_number: 1, name: "Introduction & Intelligent Agents" },
+                { unit_number: 2, name: "Search Algorithms & Heuristics" },
+                { unit_number: 3, name: "Knowledge Representation & Logic" },
+                { unit_number: 4, name: "Machine Learning Fundamentals" },
+                { unit_number: 5, name: "Expert Systems & Future of AI" }
+            ]
+        };
+
+        for (const [subName, units] of Object.entries(sampleUnitsBySubject)) {
+            const subId = subMap[subName];
+            if (subId) {
+                for (const u of units) {
+                    const [exists] = await db.query(
+                        "SELECT id FROM units WHERE subject_id = ? AND unit_number = ?",
+                        [subId, u.unit_number]
+                    );
+                    if (exists.length === 0) {
+                        await db.query(
+                            "INSERT INTO units (subject_id, unit_number, name) VALUES (?, ?, ?)",
+                            [subId, u.unit_number, u.name]
+                        );
+                    } else {
+                        await db.query(
+                            "UPDATE units SET name = ? WHERE id = ?",
+                            [u.name, exists[0].id]
+                        );
+                    }
+                }
+            }
+        }
+        console.log("Units seeded for subjects.");
+
         // SEED SAMPLE NOTES
         const [notesCount] = await db.query("SELECT COUNT(*) AS cnt FROM notes");
         if (notesCount[0].cnt === 0 && subMap["Database Management Systems"]) {
@@ -415,7 +528,13 @@ const initDatabase = async () => {
             console.log("Sample notes seeded.");
         }
 
-        // SEED SAMPLE QUESTIONS & OPTIONS
+        // Link notes to units (Phase 2)
+        await db.query(`
+            UPDATE notes n
+            JOIN units u ON n.subject_id = u.subject_id AND n.unit = u.unit_number
+            SET n.unit_id = u.id
+            WHERE n.unit_id IS NULL
+        `);
         const [qCount] = await db.query("SELECT COUNT(*) AS cnt FROM questions");
         if (qCount[0].cnt === 0 && subMap["Database Management Systems"]) {
             const dbmsId = subMap["Database Management Systems"];
