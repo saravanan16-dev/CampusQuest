@@ -1,0 +1,13 @@
+### CampusQuest Progress Tracking Tests
+
+### 1. Get Overall Progress (Questions attempted, correct, accuracy, streak, etc.)
+GET http://localhost:5000/progress
+Authorization: Bearer YOUR_STUDENT_TOKEN_HERE
+
+### 2. Get Subject-wise Performance Breakdown
+GET http://localhost:5000/progress/subjects
+Authorization: Bearer YOUR_STUDENT_TOKEN_HERE
+
+### 3. Get Weak Areas & Recommendations
+GET http://localhost:5000/progress/weak-areas
+Authorization: Bearer YOUR_STUDENT_TOKEN_HERE

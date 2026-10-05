@@ -1,0 +1,25 @@
+### CampusQuest Gamification & Leaderboard Tests
+
+### 1. Get XP, Level, and Level Progression
+GET http://localhost:5000/xp
+Authorization: Bearer YOUR_STUDENT_TOKEN_HERE
+
+### 2. Get Streak
+GET http://localhost:5000/streak
+Authorization: Bearer YOUR_STUDENT_TOKEN_HERE
+
+### 3. Get Achievements (With unlocked status)
+GET http://localhost:5000/achievements
+Authorization: Bearer YOUR_STUDENT_TOKEN_HERE
+
+### 4. Get Overall Leaderboard
+GET http://localhost:5000/leaderboard
+
+### 5. Get Weekly Leaderboard
+GET http://localhost:5000/leaderboard/weekly
+
+### 6. Get Monthly Leaderboard
+GET http://localhost:5000/leaderboard/monthly
+
+### 7. Get Accuracy Leaderboard
+GET http://localhost:5000/leaderboard/accuracy

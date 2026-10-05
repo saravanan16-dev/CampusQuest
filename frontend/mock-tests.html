@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Tests - CampusQuest</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .countdown-circle {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: conic-gradient(#ef4444 var(--pct, 0%), #f3f4f6 0%);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; font-weight: 800; color: #1e293b;
+            transition: background 1s linear;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-cq sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <i class="bi bi-mortarboard-fill text-primary me-2"></i>CampusQuest
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="subjects.html"><i class="bi bi-book me-1"></i>Subjects</a></li>
+                    <li class="nav-item"><a class="nav-link" href="notes.html"><i class="bi bi-journal-text me-1"></i>Notes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="practice.html"><i class="bi bi-lightning-charge me-1"></i>Practice</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pyqs.html"><i class="bi bi-file-earmark-pdf me-1"></i>PYQs</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="mock-tests.html"><i class="bi bi-stopwatch me-1"></i>Mock Tests</a></li>
+                    <li class="nav-item"><a class="nav-link" href="progress.html"><i class="bi bi-graph-up-arrow me-1"></i>Progress</a></li>
+                    <li class="nav-item"><a class="nav-link" href="rankings.html"><i class="bi bi-trophy me-1"></i>Rankings</a></li>
+                    <li class="nav-item"><a class="nav-link" href="ai-assistant.html"><i class="bi bi-stars me-1 text-warning"></i>AI Assistant</a></li>
+                    <li class="nav-item admin-only d-none"><a class="nav-link text-info" href="admin.html"><i class="bi bi-shield-lock me-1"></i>Admin</a></li>
+                </ul>
+                <div id="navbar-user-section"></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+
+        <!-- =================== LIST VIEW =================== -->
+        <div id="list-view">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold mb-1">Mock Examination Tests</h3>
+                    <p class="text-muted mb-0">Timed university-style assessments with auto-evaluation and detailed scorecards</p>
+                </div>
+            </div>
+            <div class="row g-4" id="mock-tests-container">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <div class="mt-2 text-muted">Loading exams...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================== EXAM VIEW =================== -->
+        <div id="exam-view" class="d-none">
+            <!-- Fixed Exam Header -->
+            <div class="card-cq p-3 mb-4 border-0 bg-dark text-white sticky-top" style="top: 60px; z-index: 100;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0 fw-bold" id="exam-title">Mock Test</h5>
+                        <small class="text-white-50" id="exam-subject">Subject</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="text-center">
+                            <div class="small text-white-50">Score</div>
+                            <div class="fw-bold" id="exam-live-score">0 / 0</div>
+                        </div>
+                        <div class="countdown-circle" id="countdown-display" style="--pct: 100%;">00:00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Questions List (all visible for scroll-through) -->
+            <div id="exam-questions-container" class="d-flex flex-column gap-4 mb-4">
+                <!-- Questions rendered by JS -->
+            </div>
+
+            <div class="text-center pb-5">
+                <button class="btn btn-danger btn-lg rounded-pill px-5 fw-bold shadow" id="submit-exam-btn" onclick="submitExam()">
+                    <i class="bi bi-send-check-fill me-2"></i>Submit Examination
+                </button>
+                <div class="text-muted small mt-2">Make sure you've answered all questions before submitting</div>
+            </div>
+        </div>
+
+        <!-- =================== RESULT VIEW =================== -->
+        <div id="result-view" class="d-none">
+            <div class="row justify-content-center">
+                <div class="col-lg-9">
+                    <!-- Score Header -->
+                    <div class="card-cq text-center p-5 mb-4" id="exam-result-card">
+                        <div class="fs-1 mb-3" id="exam-result-emoji">🎓</div>
+                        <h2 class="fw-bold mb-2" id="exam-result-title">Assessment Complete</h2>
+                        <p class="text-muted mb-4" id="exam-result-subtitle">Your exam has been evaluated.</p>
+
+                        <div class="row g-3 mb-4 justify-content-center">
+                            <div class="col-3">
+                                <div class="p-3 rounded-3 bg-light">
+                                    <div class="fs-2 fw-bold text-primary" id="exam-res-score">0</div>
+                                    <div class="small text-muted">Score</div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="p-3 rounded-3 bg-light">
+                                    <div class="fs-2 fw-bold text-success" id="exam-res-correct">0</div>
+                                    <div class="small text-muted">Correct</div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="p-3 rounded-3 bg-light">
+                                    <div class="fs-2 fw-bold text-info" id="exam-res-percentage">0%</div>
+                                    <div class="small text-muted">Percentage</div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="p-3 rounded-3 bg-light">
+                                    <div class="fs-2 fw-bold" id="exam-res-status">-</div>
+                                    <div class="small text-muted">Result</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning d-inline-flex align-items-center gap-2 mx-auto px-4 py-2">
+                            ⚡ <strong id="exam-xp-earned">+50 XP Earned!</strong>
+                        </div>
+
+                        <div id="exam-new-ach-box" class="d-none mt-3">
+                            <div class="fw-bold mb-2">🏆 New Achievements!</div>
+                            <div id="exam-new-ach-list" class="d-flex gap-2 justify-content-center flex-wrap"></div>
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-3 mt-4">
+                            <button class="btn btn-primary rounded-pill px-4" onclick="showView('list-view'); loadMockTests();">
+                                <i class="bi bi-arrow-left me-1"></i>Back to Tests
+                            </button>
+                            <a href="dashboard.html" class="btn btn-outline-secondary rounded-pill px-4">Dashboard</a>
+                        </div>
+                    </div>
+
+                    <!-- Answer Review -->
+                    <div class="card-cq p-4">
+                        <h5 class="fw-bold mb-3">Answer Key & Review</h5>
+                        <div id="exam-answers-container" class="d-flex flex-column gap-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-4 bg-white border-top mt-auto">
+        <div class="container">
+            <p class="mb-0 text-muted small">CampusQuest &copy; 2026.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/mock-tests.js"></script>
+</body>
+</html>

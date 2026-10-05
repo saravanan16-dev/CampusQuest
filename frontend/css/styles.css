@@ -1,0 +1,248 @@
+/* ==========================================================================
+   CampusQuest Modern Styling & Design System
+   Clean, modern, student-friendly, minimal, gamified without clutter.
+   ========================================================================== */
+
+:root {
+    --cq-primary: #4f46e5;
+    --cq-primary-hover: #4338ca;
+    --cq-secondary: #06b6d4;
+    --cq-success: #10b981;
+    --cq-warning: #f59e0b;
+    --cq-danger: #ef4444;
+    --cq-dark: #0f172a;
+    --cq-dark-card: #1e293b;
+    --cq-light: #f8fafc;
+    --cq-border: #e2e8f0;
+    --cq-card-bg: #ffffff;
+    --cq-text: #1e293b;
+    --cq-text-muted: #64748b;
+    --cq-radius: 12px;
+    --cq-shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --cq-shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+    --cq-shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--cq-light);
+    color: var(--cq-text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Navbar */
+.navbar-cq {
+    background: #0f172a;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navbar-brand {
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    font-size: 1.35rem;
+}
+
+.brand-badge {
+    background: linear-gradient(135deg, #4f46e5, #06b6d4);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 6px;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: #94a3b8 !important;
+    transition: all 0.2s ease;
+    padding: 0.5rem 0.85rem !important;
+    border-radius: 8px;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Avatar Circle */
+.avatar-circle {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #4f46e5, #818cf8);
+    color: white;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+/* Cards */
+.card-cq {
+    background: var(--cq-card-bg);
+    border: 1px solid var(--cq-border);
+    border-radius: var(--cq-radius);
+    box-shadow: var(--cq-shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-cq:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--cq-shadow-lg);
+}
+
+.card-cq.no-hover:hover {
+    transform: none;
+    box-shadow: var(--cq-shadow);
+}
+
+/* Stat Cards */
+.stat-widget {
+    background: white;
+    border: 1px solid var(--cq-border);
+    border-radius: var(--cq-radius);
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-widget .icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--cq-primary);
+    border-color: var(--cq-primary);
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background-color: var(--cq-primary-hover);
+    border-color: var(--cq-primary-hover);
+}
+
+.btn-rounded {
+    border-radius: 9999px;
+}
+
+/* Practice & Quiz Options */
+.quiz-option {
+    border: 2px solid var(--cq-border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 0.75rem;
+    background: white;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.quiz-option:hover {
+    border-color: #a5b4fc;
+    background: #f5f3ff;
+}
+
+.quiz-option.selected {
+    border-color: var(--cq-primary);
+    background: #eef2ff;
+    color: var(--cq-primary);
+    font-weight: 600;
+}
+
+.quiz-option.correct {
+    border-color: var(--cq-success) !important;
+    background: #ecfdf5 !important;
+    color: #065f46 !important;
+}
+
+.quiz-option.incorrect {
+    border-color: var(--cq-danger) !important;
+    background: #fef2f2 !important;
+    color: #991b1b !important;
+}
+
+.option-badge {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #475569;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.quiz-option.selected .option-badge {
+    background: var(--cq-primary);
+    color: white;
+}
+
+.quiz-option.correct .option-badge {
+    background: var(--cq-success);
+    color: white;
+}
+
+.quiz-option.incorrect .option-badge {
+    background: var(--cq-danger);
+    color: white;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    color: white;
+    padding: 4rem 1rem;
+    border-radius: 0 0 24px 24px;
+}
+
+/* Badges */
+.badge-xp {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.badge-streak {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.badge-level {
+    background: linear-gradient(135deg, #6366f1, #4338ca);
+    color: white;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+    background: white;
+    border-top: 1px solid var(--cq-border);
+    padding: 1.5rem 0;
+    font-size: 0.9rem;
+    color: var(--cq-text-muted);
+}

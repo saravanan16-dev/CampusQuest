@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Progress - CampusQuest</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-cq sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <i class="bi bi-mortarboard-fill text-primary me-2"></i>CampusQuest
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="subjects.html"><i class="bi bi-book me-1"></i>Subjects</a></li>
+                    <li class="nav-item"><a class="nav-link" href="notes.html"><i class="bi bi-journal-text me-1"></i>Notes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="practice.html"><i class="bi bi-lightning-charge me-1"></i>Practice</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pyqs.html"><i class="bi bi-file-earmark-pdf me-1"></i>PYQs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="mock-tests.html"><i class="bi bi-stopwatch me-1"></i>Mock Tests</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="progress.html"><i class="bi bi-graph-up-arrow me-1"></i>Progress</a></li>
+                    <li class="nav-item"><a class="nav-link" href="rankings.html"><i class="bi bi-trophy me-1"></i>Rankings</a></li>
+                    <li class="nav-item"><a class="nav-link" href="ai-assistant.html"><i class="bi bi-stars me-1 text-warning"></i>AI Assistant</a></li>
+                    <li class="nav-item admin-only d-none"><a class="nav-link text-info" href="admin.html"><i class="bi bi-shield-lock me-1"></i>Admin</a></li>
+                </ul>
+                <div id="navbar-user-section"></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <div class="mb-4">
+            <h3 class="fw-bold mb-1">Learning Progress & Analytics</h3>
+            <p class="text-muted">Detailed performance breakdown, weak-area diagnostics, and AI-driven insights</p>
+        </div>
+
+        <!-- Overall Stats Row -->
+        <div class="row g-3 mb-4" id="progress-stats-row">
+            <div class="col-6 col-md-3">
+                <div class="stat-widget text-center">
+                    <div class="fs-2 fw-bold text-primary" id="pg-accuracy">--%</div>
+                    <div class="text-muted small">Overall Accuracy</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-widget text-center">
+                    <div class="fs-2 fw-bold text-dark" id="pg-attempted">--</div>
+                    <div class="text-muted small">Questions Attempted</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-widget text-center">
+                    <div class="fs-2 fw-bold text-warning">🔥 <span id="pg-streak">0</span></div>
+                    <div class="text-muted small">Active Streak (days)</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-widget text-center">
+                    <div class="fs-2 fw-bold text-success" id="pg-test-avg">--%</div>
+                    <div class="text-muted small">Avg. Mock Test Score</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left: Subject Mastery -->
+            <div class="col-lg-7">
+                <div class="card-cq p-4 mb-4">
+                    <h5 class="fw-bold mb-3">Subject-Wise Mastery</h5>
+                    <div id="subject-mastery-container">
+                        <div class="text-center text-muted py-4">
+                            <div class="spinner-border spinner-border-sm text-primary me-2"></div> Loading...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weak Areas -->
+                <div class="card-cq p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">Weak Area Diagnostics</h5>
+                        <span class="badge bg-danger rounded-pill" id="weak-count">0 topics</span>
+                    </div>
+                    <p class="small text-muted mb-3">Topics where your accuracy is below 60%. Prioritize these before your next exam.</p>
+                    <div id="weak-areas-container">
+                        <div class="text-center text-muted py-4">
+                            <div class="spinner-border spinner-border-sm text-primary me-2"></div> Analyzing...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Strong Areas & AI Analysis -->
+            <div class="col-lg-5">
+                <div class="card-cq p-4 mb-4">
+                    <h5 class="fw-bold mb-3">🌟 Strong Topics</h5>
+                    <div id="strong-areas-container">
+                        <div class="text-center text-muted py-3 small">Practice more to identify your strongest topics!</div>
+                    </div>
+                </div>
+
+                <div class="card-cq p-4 mb-4" style="background: linear-gradient(135deg, #1e1b4b, #0f172a); color: white;">
+                    <h5 class="fw-bold mb-2"><i class="bi bi-stars text-warning me-2"></i>AI Study Advice</h5>
+                    <p class="text-white-50 small" id="ai-study-advice">Analyzing your performance profile...</p>
+                    <div id="ai-priority-list" class="d-flex flex-column gap-2 mt-3"></div>
+                    <a href="ai-assistant.html" class="btn btn-sm btn-warning rounded-pill mt-3 fw-semibold">
+                        Open Full AI Assistant &rarr;
+                    </a>
+                </div>
+
+                <!-- Streak Calendar Summary -->
+                <div class="card-cq p-4">
+                    <h5 class="fw-bold mb-1">Study Streak</h5>
+                    <p class="small text-muted mb-3">Daily active learning consistency tracker</p>
+                    <div class="d-flex gap-3 align-items-center mb-3">
+                        <div class="text-center">
+                            <div class="fs-2 fw-bold text-warning" id="streak-current">0</div>
+                            <div class="small text-muted">Current Streak</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="fs-2 fw-bold text-primary" id="streak-max">0</div>
+                            <div class="small text-muted">Best Streak</div>
+                        </div>
+                    </div>
+                    <div class="small text-muted" id="streak-last-active">Last active: --</div>
+                    <div class="alert alert-info small mt-3 mb-0 py-2">
+                        <i class="bi bi-lightbulb-fill me-1"></i> Log in and practice daily to maintain your streak and earn bonus XP!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-4 bg-white border-top mt-auto">
+        <div class="container">
+            <p class="mb-0 text-muted small">CampusQuest &copy; 2026. Complete Engineering Preparation Platform.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/progress.js"></script>
+</body>
+</html>

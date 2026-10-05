@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Achievements & XP - CampusQuest</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-light">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-cq sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <i class="bi bi-mortarboard-fill text-primary me-2"></i>CampusQuest
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="subjects.html"><i class="bi bi-book me-1"></i>Subjects</a></li>
+                    <li class="nav-item"><a class="nav-link" href="notes.html"><i class="bi bi-journal-text me-1"></i>Notes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="practice.html"><i class="bi bi-lightning-charge me-1"></i>Practice</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pyqs.html"><i class="bi bi-file-earmark-pdf me-1"></i>PYQs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="mock-tests.html"><i class="bi bi-stopwatch me-1"></i>Mock Tests</a></li>
+                    <li class="nav-item"><a class="nav-link" href="progress.html"><i class="bi bi-graph-up-arrow me-1"></i>Progress</a></li>
+                    <li class="nav-item"><a class="nav-link" href="rankings.html"><i class="bi bi-trophy me-1"></i>Rankings</a></li>
+                    <li class="nav-item"><a class="nav-link" href="ai-assistant.html"><i class="bi bi-stars me-1 text-warning"></i>AI Assistant</a></li>
+                    <li class="nav-item admin-only d-none"><a class="nav-link text-info" href="admin.html"><i class="bi bi-shield-lock me-1"></i>Admin</a></li>
+                </ul>
+                <div id="navbar-user-section"></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <!-- Hero Gamification Banner -->
+        <div class="card-cq p-4 mb-4 text-white" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-warning text-dark px-3 py-1.5 rounded-pill fw-bold" id="ach-level-badge">
+                            ⚡ Level 1 — Beginner
+                        </span>
+                        <span class="badge bg-danger text-white px-3 py-1.5 rounded-pill fw-bold" id="ach-streak-badge">
+                            🔥 0 Day Streak
+                        </span>
+                    </div>
+                    <h2 class="fw-bold mb-1" id="ach-user-title">Gamification & XP Mastery</h2>
+                    <p class="text-white-50 small mb-3">Earn XP by practicing questions, maintaining daily streaks, and conquering mock tests.</p>
+                    
+                    <div class="d-flex justify-content-between small text-white-50 mb-1">
+                        <span id="ach-xp-progress-text">XP: 0 / 100</span>
+                        <span id="ach-xp-percentage">0% to next level</span>
+                    </div>
+                    <div class="progress" style="height: 12px; border-radius: 6px; background-color: rgba(255,255,255,0.2);">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" id="ach-xp-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 text-center mt-3 mt-md-0">
+                    <div class="bg-white bg-opacity-10 p-3 rounded-4 border border-white border-opacity-10">
+                        <div class="display-5 fw-bold text-warning mb-0" id="ach-total-xp">0</div>
+                        <div class="text-white-50 small text-uppercase fw-semibold">Total XP Earned</div>
+                        <div class="mt-2 small text-white">
+                            <span class="fw-bold text-success" id="ach-unlocked-count">0</span> / <span id="ach-total-count">8</span> Badges Unlocked
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Levels Progression Guide -->
+        <div class="card-cq p-4 mb-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-layers text-primary me-2"></i>CampusQuest Ranks & Levels</h5>
+            <div class="row g-2 text-center" id="levels-guide">
+                <div class="col-md">
+                    <div class="p-3 rounded border bg-light" id="level-card-1">
+                        <div class="fw-bold text-dark">Level 1</div>
+                        <div class="badge bg-secondary mb-1">Beginner</div>
+                        <div class="small text-muted">0 - 99 XP</div>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="p-3 rounded border bg-light" id="level-card-2">
+                        <div class="fw-bold text-dark">Level 2</div>
+                        <div class="badge bg-info text-dark mb-1">Explorer</div>
+                        <div class="small text-muted">100 - 299 XP</div>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="p-3 rounded border bg-light" id="level-card-3">
+                        <div class="fw-bold text-dark">Level 3</div>
+                        <div class="badge bg-primary mb-1">Learner</div>
+                        <div class="small text-muted">300 - 599 XP</div>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="p-3 rounded border bg-light" id="level-card-4">
+                        <div class="fw-bold text-dark">Level 4</div>
+                        <div class="badge bg-warning text-dark mb-1">Achiever</div>
+                        <div class="small text-muted">600 - 999 XP</div>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="p-3 rounded border bg-light" id="level-card-5">
+                        <div class="fw-bold text-dark">Level 5</div>
+                        <div class="badge bg-danger mb-1">Master</div>
+                        <div class="small text-muted">1000+ XP</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Achievements Grid -->
+            <div class="col-lg-8">
+                <div class="card-cq p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-trophy-fill text-warning me-2"></i>All Achievement Badges</h5>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-secondary active filter-ach-btn" data-filter="all">All</button>
+                            <button type="button" class="btn btn-outline-secondary filter-ach-btn" data-filter="unlocked">Unlocked</button>
+                            <button type="button" class="btn btn-outline-secondary filter-ach-btn" data-filter="locked">Locked</button>
+                        </div>
+                    </div>
+
+                    <div class="row g-3" id="achievements-container">
+                        <div class="col-12 text-center py-5 text-muted">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <div class="mt-2">Loading achievements...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- XP Activity History -->
+            <div class="col-lg-4">
+                <div class="card-cq p-4 mb-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-clock-history text-info me-2"></i>Recent XP Gains</h5>
+                    <div id="xp-history-container" class="d-flex flex-column gap-2">
+                        <div class="text-muted small py-3 text-center">Loading transactions...</div>
+                    </div>
+                </div>
+
+                <!-- XP Reward Rules -->
+                <div class="card-cq p-4 bg-light">
+                    <h6 class="fw-bold mb-2"><i class="bi bi-info-circle text-primary me-1"></i>How To Earn XP:</h6>
+                    <ul class="list-unstyled small mb-0 d-flex flex-column gap-2 text-muted">
+                        <li><strong class="text-success">+10 XP</strong> Complete a practice session</li>
+                        <li><strong class="text-success">+5 XP</strong> Every correct question answered</li>
+                        <li><strong class="text-success">+50 XP</strong> Complete a timed mock test</li>
+                        <li><strong class="text-success">+20 XP</strong> Perfect score bonus in practice</li>
+                        <li><strong class="text-success">+50 - 250 XP</strong> Unlocking achievements</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 bg-white border-top mt-auto">
+        <div class="container">
+            <p class="mb-0 text-muted small">CampusQuest &copy; 2026. Complete Engineering Preparation Platform.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/achievements.js"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+### CampusQuest Practice Arena Tests
+
+### 1. Start Practice Session
+POST http://localhost:5000/practice/start
+Authorization: Bearer YOUR_STUDENT_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "subject_id": 1,
+    "unit": 3,
+    "difficulty": "MEDIUM",
+    "count": 3
+}
+
+### 2. Submit Practice Answers
+POST http://localhost:5000/practice/1/submit
+Authorization: Bearer YOUR_STUDENT_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "time_taken_seconds": 45,
+    "answers": [
+        {
+            "question_id": 1,
+            "selected_option": "B"
+        }
+    ]
+}
+
+### 3. Get Practice Result
+GET http://localhost:5000/practice/1/result
+Authorization: Bearer YOUR_STUDENT_TOKEN_HERE
+
+### 4. Get Practice History
+GET http://localhost:5000/practice/history
+Authorization: Bearer YOUR_STUDENT_TOKEN_HERE

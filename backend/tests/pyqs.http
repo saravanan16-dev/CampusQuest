@@ -1,0 +1,25 @@
+### CampusQuest Previous Year Questions (PYQs) Tests
+
+### 1. Get All PYQs
+GET http://localhost:5000/pyqs
+
+### 2. Get PYQs filtered by Subject and Year
+GET http://localhost:5000/pyqs?subjectId=1&year=2024
+
+### 3. Get Single PYQ by ID
+GET http://localhost:5000/pyqs/1
+
+### 4. Create PYQ (Admin Only)
+POST http://localhost:5000/pyqs
+Authorization: Bearer YOUR_ADMIN_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "subject_id": 1,
+    "regulation": "2021",
+    "year": 2023,
+    "semester": 5,
+    "exam_type": "Supplementary",
+    "title": "DBMS University Supplementary Exam 2023",
+    "file_url": "/uploads/pyqs/dbms_2023_supp.pdf"
+}

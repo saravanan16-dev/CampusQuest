@@ -1,0 +1,18 @@
+### CampusQuest Admin Tests
+
+### 1. Get Platform Analytics
+GET http://localhost:5000/admin/analytics
+Authorization: Bearer YOUR_ADMIN_TOKEN_HERE
+
+### 2. Get All Users
+GET http://localhost:5000/admin/users
+Authorization: Bearer YOUR_ADMIN_TOKEN_HERE
+
+### 3. Change User Role
+PUT http://localhost:5000/admin/users/2/role
+Authorization: Bearer YOUR_ADMIN_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "role": "ADMIN"
+}

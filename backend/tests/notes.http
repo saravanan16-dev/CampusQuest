@@ -1,0 +1,24 @@
+### CampusQuest Notes Tests
+
+### 1. Get Notes by Subject ID
+GET http://localhost:5000/subjects/1/notes
+
+### 2. Get Notes filtered by Subject ID and Unit
+GET http://localhost:5000/subjects/1/notes?unit=1
+
+### 3. Get Single Note by ID
+GET http://localhost:5000/notes/1
+
+### 4. Create Note (Admin Only)
+POST http://localhost:5000/notes
+Authorization: Bearer YOUR_ADMIN_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "subject_id": 1,
+    "unit": 4,
+    "title": "Unit 4: Transaction Processing & Recovery",
+    "description": "ACID properties, serializability, log-based recovery, checkpoints.",
+    "content": "### Unit 4: Transactions and Recovery\n\n- ACID Principles\n- WAL (Write-Ahead Logging)\n- 2-Phase Locking protocol",
+    "file_url": "/uploads/notes/dbms_unit4.pdf"
+}

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Study Buddy & Exam Intelligence - CampusQuest</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-light">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-cq sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <i class="bi bi-mortarboard-fill text-primary me-2"></i>CampusQuest
+                <span class="brand-badge bg-warning text-dark">AI</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="subjects.html"><i class="bi bi-book me-1"></i>Subjects</a></li>
+                    <li class="nav-item"><a class="nav-link" href="notes.html"><i class="bi bi-journal-text me-1"></i>Notes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="practice.html"><i class="bi bi-lightning-charge me-1"></i>Practice</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pyqs.html"><i class="bi bi-file-earmark-pdf me-1"></i>PYQs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="mock-tests.html"><i class="bi bi-stopwatch me-1"></i>Mock Tests</a></li>
+                    <li class="nav-item"><a class="nav-link" href="progress.html"><i class="bi bi-graph-up-arrow me-1"></i>Progress</a></li>
+                    <li class="nav-item"><a class="nav-link" href="rankings.html"><i class="bi bi-trophy me-1"></i>Rankings</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="ai-assistant.html"><i class="bi bi-stars me-1 text-warning"></i>AI Assistant</a></li>
+                    <li class="nav-item admin-only d-none"><a class="nav-link text-info" href="admin.html"><i class="bi bi-shield-lock me-1"></i>Admin</a></li>
+                </ul>
+                <div id="navbar-user-section"></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <!-- Header -->
+        <div class="card-cq p-4 mb-4 text-white" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4f46e5 100%);">
+            <div class="row align-items-center">
+                <div class="col-md-9">
+                    <span class="badge bg-warning text-dark px-3 py-1.5 rounded-pill mb-2 fw-bold">
+                        <i class="bi bi-stars me-1"></i>AI Learning Intelligence
+                    </span>
+                    <h2 class="fw-bold mb-2">CampusQuest AI Study Assistant</h2>
+                    <p class="text-white-50 mb-0">Personalized study roadmaps based on your weak areas, interactive concept explanations, and university exam intelligence.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Navigation Tabs -->
+        <ul class="nav nav-pills nav-fill card-cq p-2 mb-4 bg-white" id="ai-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active rounded-pill fw-semibold" id="tab-rec" data-bs-toggle="tab" data-bs-target="#pane-rec" type="button">
+                    <i class="bi bi-compass me-1"></i>Personalized Recommendations
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill fw-semibold" id="tab-concept" data-bs-toggle="tab" data-bs-target="#pane-concept" type="button">
+                    <i class="bi bi-lightbulb me-1"></i>Concept Explainer
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill fw-semibold" id="tab-exam" data-bs-toggle="tab" data-bs-target="#pane-exam" type="button">
+                    <i class="bi bi-bar-chart me-1"></i>Exam Intelligence
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content Panes -->
+        <div class="tab-content" id="ai-tabs-content">
+            <!-- 1. Personalized Recommendations -->
+            <div class="tab-pane fade show active" id="pane-rec" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-lg-12">
+                        <div class="card-cq p-4 mb-4 border-warning bg-warning-subtle">
+                            <h5 class="fw-bold text-dark mb-1"><i class="bi bi-chat-quote-fill text-warning me-2"></i>AI Diagnostic Feedback</h5>
+                            <p class="mb-0 text-dark" id="ai-advice-display">Generating dynamic feedback based on your quiz & mock test history...</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card-cq p-4 h-100">
+                            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-bullseye text-danger me-2"></i>Priority Weak Topics</h6>
+                            <div id="rec-weak-topics" class="d-flex flex-column gap-2">
+                                <div class="text-muted small">Loading weak topics...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card-cq p-4 h-100">
+                            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-journal-check text-primary me-2"></i>Recommended Revision Notes</h6>
+                            <div id="rec-notes" class="d-flex flex-column gap-2">
+                                <div class="text-muted small">Loading notes...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 col-lg-4">
+                        <div class="card-cq p-4 h-100">
+                            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-stopwatch text-success me-2"></i>Recommended Mock Tests</h6>
+                            <div id="rec-tests" class="d-flex flex-column gap-2">
+                                <div class="text-muted small">Loading tests...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Concept Explainer -->
+            <div class="tab-pane fade" id="pane-concept" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-lg-5">
+                        <div class="card-cq p-4">
+                            <h5 class="fw-bold mb-3"><i class="bi bi-search text-primary me-2"></i>Explain an Engineering Concept</h5>
+                            <p class="text-muted small">Enter any concept (e.g. Normalization, Deadlock, Routing, ACID, Red-Black Trees) for a structured breakdown.</p>
+                            
+                            <form id="concept-form">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Concept Name</label>
+                                    <input type="text" class="form-control" id="concept-input" placeholder="e.g. Normalization" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Subject / Context</label>
+                                    <input type="text" class="form-control" id="subject-input" placeholder="e.g. Database Management Systems">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary rounded-pill w-100 fw-semibold" id="concept-btn">
+                                    <i class="bi bi-magic me-1"></i>Generate Explanation
+                                </button>
+                            </form>
+
+                            <!-- Quick concept chips -->
+                            <div class="mt-4 pt-3 border-top">
+                                <small class="text-muted d-block mb-2">Try common topics:</small>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="quickConcept('Normalization', 'DBMS')">Normalization</button>
+                                    <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="quickConcept('Deadlock', 'Operating Systems')">Deadlock</button>
+                                    <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="quickConcept('Routing', 'Computer Networks')">IP Routing</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-7">
+                        <div class="card-cq p-4 h-100" id="concept-output-card">
+                            <div id="concept-placeholder" class="text-center py-5 text-muted">
+                                <i class="bi bi-lightbulb fs-1 d-block mb-2 text-warning"></i>
+                                Select or enter a concept on the left to see an engineering-level breakdown, key exam points, and practical examples.
+                            </div>
+
+                            <div id="concept-results" class="d-none">
+                                <h4 class="fw-bold text-dark mb-2" id="concept-title">Concept Title</h4>
+                                <p class="lead fs-6 text-muted mb-3" id="concept-def">Definition</p>
+                                
+                                <h6 class="fw-bold text-primary mt-3 mb-2"><i class="bi bi-check2-circle me-1"></i>Core Principles & Formulations:</h6>
+                                <ul class="small lh-lg mb-3" id="concept-points"></ul>
+
+                                <div class="p-3 bg-light rounded-3 mb-3 border">
+                                    <div class="fw-bold small text-dark mb-1"><i class="bi bi-code-slash text-info me-1"></i>Practical Example:</div>
+                                    <div class="small text-muted" id="concept-example">Example text</div>
+                                </div>
+
+                                <div class="alert alert-warning small mb-0 py-2">
+                                    <i class="bi bi-mortarboard-fill text-warning me-1"></i><strong>Exam Scoring Tip:</strong> <span id="concept-tip"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Exam Intelligence -->
+            <div class="tab-pane fade" id="pane-exam" role="tabpanel">
+                <div class="card-cq p-4 mb-4">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-6">
+                            <h5 class="fw-bold mb-1"><i class="bi bi-graph-up text-primary me-2"></i>Exam Question Frequency & Intelligence</h5>
+                            <p class="text-muted small mb-0">Historical pattern analysis of past university question papers (PYQs) and weightages.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex gap-2 justify-content-md-end">
+                                <select class="form-select form-select-sm" id="exam-subject-select" style="max-width: 300px;">
+                                    <option value="">Select subject to analyze...</option>
+                                </select>
+                                <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="runExamIntelligence()">
+                                    Analyze
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="exam-intel-results" class="d-none">
+                    <div class="row g-4 mb-4">
+                        <div class="col-lg-6">
+                            <div class="card-cq p-4 h-100">
+                                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-fire text-danger me-2"></i>High-Yield Revision Priorities</h6>
+                                <div id="intel-priorities" class="d-flex flex-column gap-2"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="card-cq p-4 h-100">
+                                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-pie-chart text-info me-2"></i>Unit Weightage Distribution</h6>
+                                <div id="intel-units" class="d-flex flex-column gap-2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-cq p-4 bg-light">
+                        <h6 class="fw-bold mb-2"><i class="bi bi-lightbulb-fill text-warning me-1"></i>Strategic Practice Priorities:</h6>
+                        <ul class="small text-muted mb-2 d-flex flex-column gap-1" id="intel-tips"></ul>
+                        <div class="text-muted" style="font-size: 0.72rem;" id="intel-disclaimer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 bg-white border-top mt-auto">
+        <div class="container">
+            <p class="mb-0 text-muted small">CampusQuest &copy; 2026. Complete Engineering Preparation Platform.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ai.js"></script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice Arena - CampusQuest</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .practice-setup { max-width: 640px; margin: 0 auto; }
+        .question-card { background: white; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .timer-ring { width: 56px; height: 56px; border-radius: 50%; background: conic-gradient(#4f46e5 0%, #e2e8f0 0%); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 800; color: #1e293b; transition: background 0.5s ease; }
+        .progress-step { width: 28px; height: 28px; border-radius: 50%; background: #e2e8f0; color: #64748b; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+        .progress-step.done { background: #10b981; color: white; }
+        .progress-step.active { background: #4f46e5; color: white; ring: 2px solid #818cf8; }
+        .progress-step.wrong { background: #ef4444; color: white; }
+    </style>
+</head>
+<body class="bg-light">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-cq sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <i class="bi bi-mortarboard-fill text-primary me-2"></i>CampusQuest
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="subjects.html"><i class="bi bi-book me-1"></i>Subjects</a></li>
+                    <li class="nav-item"><a class="nav-link" href="notes.html"><i class="bi bi-journal-text me-1"></i>Notes</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="practice.html"><i class="bi bi-lightning-charge me-1"></i>Practice</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pyqs.html"><i class="bi bi-file-earmark-pdf me-1"></i>PYQs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="mock-tests.html"><i class="bi bi-stopwatch me-1"></i>Mock Tests</a></li>
+                    <li class="nav-item"><a class="nav-link" href="progress.html"><i class="bi bi-graph-up-arrow me-1"></i>Progress</a></li>
+                    <li class="nav-item"><a class="nav-link" href="rankings.html"><i class="bi bi-trophy me-1"></i>Rankings</a></li>
+                    <li class="nav-item"><a class="nav-link" href="ai-assistant.html"><i class="bi bi-stars me-1 text-warning"></i>AI Assistant</a></li>
+                    <li class="nav-item admin-only d-none"><a class="nav-link text-info" href="admin.html"><i class="bi bi-shield-lock me-1"></i>Admin</a></li>
+                </ul>
+                <div id="navbar-user-section"></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+
+        <!-- ======================== SETUP SCREEN ======================== -->
+        <div id="setup-screen">
+            <div class="practice-setup">
+                <div class="text-center mb-4">
+                    <span class="fs-1">⚡</span>
+                    <h3 class="fw-bold mb-1">Practice Arena</h3>
+                    <p class="text-muted">Select your target subject, unit, and difficulty to begin a focused session</p>
+                </div>
+
+                <div class="card-cq p-4">
+                    <form id="practice-setup-form">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Subject <span class="text-danger">*</span></label>
+                            <select class="form-select" id="setup-subject" required>
+                                <option value="">-- Select a subject --</option>
+                            </select>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Unit (Optional)</label>
+                                <select class="form-select" id="setup-unit">
+                                    <option value="">All Units</option>
+                                    <option value="1">Unit 1</option>
+                                    <option value="2">Unit 2</option>
+                                    <option value="3">Unit 3</option>
+                                    <option value="4">Unit 4</option>
+                                    <option value="5">Unit 5</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Difficulty</label>
+                                <select class="form-select" id="setup-difficulty">
+                                    <option value="">All Difficulties</option>
+                                    <option value="EASY">🟢 Easy</option>
+                                    <option value="MEDIUM">🟡 Medium</option>
+                                    <option value="HARD">🔴 Hard</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Number of Questions</label>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button type="button" class="btn btn-outline-secondary rounded-pill px-3 count-btn active" data-count="5">5 Quick</button>
+                                <button type="button" class="btn btn-outline-secondary rounded-pill px-3 count-btn" data-count="10">10 Standard</button>
+                                <button type="button" class="btn btn-outline-secondary rounded-pill px-3 count-btn" data-count="20">20 Full</button>
+                            </div>
+                            <input type="hidden" id="setup-count" value="5">
+                        </div>
+
+                        <div id="setup-error" class="alert alert-danger d-none small py-2 mb-3"></div>
+
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold" id="start-btn">
+                            <i class="bi bi-lightning-charge-fill me-1"></i>Start Practice Session
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================== QUIZ SCREEN ======================== -->
+        <div id="quiz-screen" class="d-none">
+            <div class="row g-4 justify-content-center">
+                <div class="col-lg-8">
+                    <!-- Progress Header -->
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="d-flex gap-2 align-items-center" id="progress-dots">
+                            <!-- Question dots filled by JS -->
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div>
+                                <span class="text-muted small">Time per Q</span>
+                                <div class="fw-bold text-center" id="timer-display">0s</div>
+                            </div>
+                            <div class="timer-ring" id="timer-ring">--</div>
+                        </div>
+                    </div>
+
+                    <!-- Question Card -->
+                    <div class="question-card p-4 mb-3">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle" id="q-topic-badge">Topic</span>
+                            <span class="badge" id="q-difficulty-badge">Medium</span>
+                        </div>
+
+                        <p class="fw-semibold fs-5 lh-base mb-4" id="question-text">Loading question...</p>
+
+                        <div id="options-container">
+                            <!-- Options rendered by JS -->
+                        </div>
+
+                        <div id="explanation-box" class="d-none mt-3 p-3 rounded-3 small">
+                            <!-- Shown after answer submitted -->
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted small">Question <strong id="current-q-num">1</strong> of <strong id="total-q-num">5</strong></span>
+                        <button class="btn btn-primary rounded-pill px-4" id="next-btn" disabled>
+                            Next Question <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sidebar Progress -->
+                <div class="col-lg-4">
+                    <div class="card-cq p-4">
+                        <h6 class="fw-bold mb-3">Session Progress</h6>
+                        <div class="d-flex justify-content-between mb-2 small">
+                            <span class="text-success fw-semibold">✓ Correct</span>
+                            <strong id="score-correct" class="text-success">0</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3 small">
+                            <span class="text-danger fw-semibold">✗ Incorrect</span>
+                            <strong id="score-wrong" class="text-danger">0</strong>
+                        </div>
+                        <div class="progress mb-3" style="height: 8px;">
+                            <div class="progress-bar bg-success" id="score-bar" style="width: 0%"></div>
+                        </div>
+                        <div class="text-center small text-muted" id="score-percent">0% accuracy</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================== RESULT SCREEN ======================== -->
+        <div id="result-screen" class="d-none">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <!-- Score Card -->
+                    <div class="card-cq text-center p-5 mb-4" id="score-result-card">
+                        <div class="fs-1 mb-2" id="result-emoji">🎯</div>
+                        <h2 class="fw-bold mb-1" id="result-title">Good Job!</h2>
+                        <p class="text-muted mb-3" id="result-subtitle">Practice session complete</p>
+
+                        <div class="row g-3 justify-content-center mb-4">
+                            <div class="col-4">
+                                <div class="p-3 bg-light rounded-3 text-center">
+                                    <div class="fs-2 fw-bold text-success" id="res-correct">0</div>
+                                    <div class="small text-muted">Correct</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-3 bg-light rounded-3 text-center">
+                                    <div class="fs-2 fw-bold text-danger" id="res-wrong">0</div>
+                                    <div class="small text-muted">Incorrect</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-3 bg-light rounded-3 text-center">
+                                    <div class="fs-2 fw-bold text-primary" id="res-accuracy">0%</div>
+                                    <div class="small text-muted">Accuracy</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- XP Awarded -->
+                        <div class="alert alert-warning d-flex align-items-center justify-content-center gap-3 mx-auto" style="max-width: 360px;">
+                            <span class="fs-3">⚡</span>
+                            <div>
+                                <div class="fw-bold text-dark" id="res-xp-earned">+10 XP Earned!</div>
+                                <div class="small text-dark" id="res-total-xp">Total: Loading...</div>
+                            </div>
+                        </div>
+
+                        <!-- New Achievement unlocks -->
+                        <div id="new-achievements-box" class="d-none mt-3">
+                            <div class="fw-bold text-dark mb-2">🏆 New Achievements Unlocked!</div>
+                            <div id="new-achievements-list" class="d-flex flex-wrap justify-content-center gap-2"></div>
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-center mt-4">
+                            <button class="btn btn-primary rounded-pill px-4" onclick="resetPractice()">
+                                <i class="bi bi-arrow-repeat me-1"></i>New Session
+                            </button>
+                            <a href="dashboard.html" class="btn btn-outline-secondary rounded-pill px-4">Dashboard</a>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Answer Review -->
+                    <div class="card-cq p-4">
+                        <h5 class="fw-bold mb-3">Answer Review</h5>
+                        <div id="result-answers-container" class="d-flex flex-column gap-3">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 bg-white border-top mt-5">
+        <div class="container">
+            <p class="mb-0 text-muted small">CampusQuest &copy; 2026. Complete Engineering Preparation Platform.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/practice.js"></script>
+</body>
+</html>

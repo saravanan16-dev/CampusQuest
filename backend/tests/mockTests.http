@@ -1,0 +1,29 @@
+### CampusQuest Mock Test Tests
+
+### 1. Get All Mock Tests
+GET http://localhost:5000/mock-tests
+
+### 2. Get Mock Test Details
+GET http://localhost:5000/mock-tests/1
+
+### 3. Start Mock Test
+POST http://localhost:5000/mock-tests/1/start
+Authorization: Bearer YOUR_STUDENT_TOKEN_HERE
+
+### 4. Submit Mock Test
+POST http://localhost:5000/mock-tests/1/submit
+Authorization: Bearer YOUR_STUDENT_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "answers": [
+        {
+            "question_id": 1,
+            "selected_option": "B"
+        }
+    ]
+}
+
+### 5. Get Mock Test Result
+GET http://localhost:5000/mock-tests/1/result
+Authorization: Bearer YOUR_STUDENT_TOKEN_HERE

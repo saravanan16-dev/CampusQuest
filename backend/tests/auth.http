@@ -1,0 +1,44 @@
+### CampusQuest Authentication Tests
+
+### 1. Register a new student
+POST http://localhost:5000/register
+Content-Type: application/json
+
+{
+    "username": "johndoe",
+    "name": "John Doe",
+    "email": "johndoe@example.com",
+    "password": "Password123!",
+    "role": "STUDENT"
+}
+
+### 2. Login as Student
+POST http://localhost:5000/login
+Content-Type: application/json
+
+{
+    "email": "student@campusquest.com",
+    "password": "Student@123"
+}
+
+### 3. Login as Admin
+POST http://localhost:5000/login
+Content-Type: application/json
+
+{
+    "email": "admin@campusquest.com",
+    "password": "Admin@123"
+}
+
+### 4. Get Student Profile (Requires JWT Bearer Token)
+GET http://localhost:5000/profile
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### 5. Update Profile
+PUT http://localhost:5000/profile
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "name": "Alex J. Updated"
+}

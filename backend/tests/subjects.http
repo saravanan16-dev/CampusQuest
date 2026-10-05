@@ -1,0 +1,32 @@
+### CampusQuest Subjects Tests
+
+### 1. Get All Subjects
+GET http://localhost:5000/subjects
+
+### 2. Get Subjects filtered by Semester
+GET http://localhost:5000/subjects?semester=5
+
+### 3. Get Subject by ID
+GET http://localhost:5000/subjects/1
+
+### 4. Create Subject (Admin Only)
+POST http://localhost:5000/subjects
+Authorization: Bearer YOUR_ADMIN_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "name": "Cloud Computing",
+    "description": "Virtualization, AWS, Microservices, and Serverless architectures.",
+    "semester": 6
+}
+
+### 5. Update Subject (Admin Only)
+PUT http://localhost:5000/subjects/1
+Authorization: Bearer YOUR_ADMIN_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "name": "Database Management Systems (RDBMS)",
+    "description": "Advanced Relational Data Models, Indexing, and Transactions.",
+    "semester": 5
+}

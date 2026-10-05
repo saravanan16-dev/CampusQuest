@@ -1,0 +1,28 @@
+### CampusQuest AI Assistant & Intelligence Tests
+
+### 1. Get AI Personalized Recommendations
+GET http://localhost:5000/ai/recommendations
+Authorization: Bearer YOUR_STUDENT_TOKEN_HERE
+
+### 2. AI Concept Explainer
+POST http://localhost:5000/ai/explain-concept
+Content-Type: application/json
+
+{
+    "concept": "normalization",
+    "subject_name": "Database Management Systems"
+}
+
+### 3. AI Wrong Answer Explainer
+POST http://localhost:5000/ai/explain-wrong-answer
+Content-Type: application/json
+
+{
+    "question_text": "A relation is in BCNF if for every functional dependency X -> Y:",
+    "selected_answer": "A",
+    "correct_answer": "B",
+    "explanation": "BCNF requires that every determinant X must be a superkey."
+}
+
+### 4. Exam Intelligence Analysis
+GET http://localhost:5000/ai/exam-intelligence/1

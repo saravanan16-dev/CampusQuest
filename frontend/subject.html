@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subject Hub - CampusQuest</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-light">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-cq sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <i class="bi bi-mortarboard-fill text-primary me-2"></i>CampusQuest
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="subjects.html"><i class="bi bi-book me-1"></i>Subjects</a></li>
+                    <li class="nav-item"><a class="nav-link" href="notes.html"><i class="bi bi-journal-text me-1"></i>Notes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="practice.html"><i class="bi bi-lightning-charge me-1"></i>Practice</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pyqs.html"><i class="bi bi-file-earmark-pdf me-1"></i>PYQs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="mock-tests.html"><i class="bi bi-stopwatch me-1"></i>Mock Tests</a></li>
+                    <li class="nav-item"><a class="nav-link" href="progress.html"><i class="bi bi-graph-up-arrow me-1"></i>Progress</a></li>
+                    <li class="nav-item"><a class="nav-link" href="rankings.html"><i class="bi bi-trophy me-1"></i>Rankings</a></li>
+                    <li class="nav-item"><a class="nav-link" href="ai-assistant.html"><i class="bi bi-stars me-1 text-warning"></i>AI Assistant</a></li>
+                    <li class="nav-item admin-only d-none"><a class="nav-link text-info" href="admin.html"><i class="bi bi-shield-lock me-1"></i>Admin</a></li>
+                </ul>
+                <div id="navbar-user-section"></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <!-- Subject Banner -->
+        <div class="card-cq p-4 mb-4 bg-white border-0 shadow-sm" style="border-left: 6px solid var(--cq-primary) !important;">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill mb-2 fw-semibold" id="subject-sem-badge">
+                        Semester --
+                    </span>
+                    <h2 class="fw-bold mb-1 text-dark" id="subject-title">Loading Subject...</h2>
+                    <p class="text-muted mb-0" id="subject-desc">Description</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="#" id="subject-practice-btn" class="btn btn-primary rounded-pill px-4">
+                        <i class="bi bi-lightning-charge-fill me-1"></i>Practice Subject
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <ul class="nav nav-pills card-cq p-2 mb-4 bg-white" id="subject-tabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active rounded-pill fw-semibold" data-bs-toggle="tab" data-bs-target="#tab-sub-notes">
+                    <i class="bi bi-journal-text me-1"></i>Notes (Units 1-5)
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link rounded-pill fw-semibold" data-bs-toggle="tab" data-bs-target="#tab-sub-pyqs">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>Previous Year Papers
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link rounded-pill fw-semibold" data-bs-toggle="tab" data-bs-target="#tab-sub-tests">
+                    <i class="bi bi-stopwatch me-1"></i>Mock Exams
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="subject-tab-content">
+            <!-- Notes Tab -->
+            <div class="tab-pane fade show active" id="tab-sub-notes" role="tabpanel">
+                <div class="row g-4" id="subject-notes-container">
+                    <div class="col-12 text-center py-5 text-muted">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <div class="mt-2">Loading unit notes...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PYQs Tab -->
+            <div class="tab-pane fade" id="tab-sub-pyqs" role="tabpanel">
+                <div class="row g-4" id="subject-pyqs-container">
+                    <div class="col-12 text-center py-5 text-muted">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <div class="mt-2">Loading previous year papers...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mock Tests Tab -->
+            <div class="tab-pane fade" id="tab-sub-tests" role="tabpanel">
+                <div class="row g-4" id="subject-tests-container">
+                    <div class="col-12 text-center py-5 text-muted">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <div class="mt-2">Loading mock tests...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Reader Modal -->
+    <div class="modal fade" id="noteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white">
+                    <div>
+                        <span class="badge bg-primary rounded-pill mb-1" id="modal-note-badge">Unit 1</span>
+                        <h5 class="modal-title fw-bold" id="modal-note-title">Note Title</h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="modal-note-content" class="lh-lg" style="white-space: pre-wrap;"></div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <a href="#" id="modal-note-download" class="btn btn-outline-primary rounded-pill" target="_blank">Download PDF</a>
+                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 bg-white border-top mt-auto">
+        <div class="container">
+            <p class="mb-0 text-muted small">CampusQuest &copy; 2026. Complete Engineering Preparation Platform.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const subjectId = urlParams.get("id");
+
+            if (!subjectId) {
+                window.location.href = "subjects.html";
+                return;
+            }
+
+            document.getElementById("subject-practice-btn").href = `practice.html?subjectId=${subjectId}`;
+
+            try {
+                // 1. Fetch Subject
+                const subRes = await API.getSubject(subjectId);
+                if (subRes.success) {
+                    const sub = subRes.data;
+                    document.getElementById("subject-title").innerText = sub.name;
+                    document.getElementById("subject-desc").innerText = sub.description || "Comprehensive syllabus coverage.";
+                    document.getElementById("subject-sem-badge").innerText = `Semester ${sub.semester || 1}`;
+                }
+
+                // 2. Fetch Notes
+                const notesRes = await API.getNotes(subjectId);
+                const notesContainer = document.getElementById("subject-notes-container");
+                if (notesRes.success && notesRes.data.length > 0) {
+                    notesContainer.innerHTML = notesRes.data.map(n => `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card-cq h-100 p-4 d-flex flex-column">
+                                <span class="badge bg-primary text-white rounded-pill px-2.5 py-1 align-self-start mb-2">Unit ${n.unit}</span>
+                                <h6 class="fw-bold text-dark mb-2">${n.title}</h6>
+                                <p class="text-muted small flex-grow-1">${n.description || ""}</p>
+                                <button class="btn btn-sm btn-outline-primary rounded-pill mt-3" onclick="openSubjectNote(${n.id})">
+                                    Read Note
+                                </button>
+                            </div>
+                        </div>
+                    `).join("");
+                } else {
+                    notesContainer.innerHTML = `<div class="col-12 text-center py-5 text-muted">No notes uploaded for this subject yet.</div>`;
+                }
+
+                // 3. Fetch PYQs
+                const pyqRes = await API.getPYQs({ subjectId });
+                const pyqContainer = document.getElementById("subject-pyqs-container");
+                if (pyqRes.success && pyqRes.data.length > 0) {
+                    pyqContainer.innerHTML = pyqRes.data.map(p => `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card-cq h-100 p-4 d-flex flex-column">
+                                <div class="d-flex gap-2 mb-2">
+                                    <span class="badge bg-light text-dark border">${p.year}</span>
+                                    <span class="badge bg-secondary-subtle text-secondary">${p.regulation} Regulation</span>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-3 flex-grow-1">${p.title}</h6>
+                                ${p.file_url ? `<a href="${p.file_url}" target="_blank" class="btn btn-sm btn-primary rounded-pill">View Paper</a>` : `<span class="text-muted small">No file</span>`}
+                            </div>
+                        </div>
+                    `).join("");
+                } else {
+                    pyqContainer.innerHTML = `<div class="col-12 text-center py-5 text-muted">No PYQs uploaded for this subject yet.</div>`;
+                }
+
+                // 4. Fetch Mock Tests
+                const testsRes = await API.getMockTests(subjectId);
+                const testsContainer = document.getElementById("subject-tests-container");
+                if (testsRes.success && testsRes.data.length > 0) {
+                    testsContainer.innerHTML = testsRes.data.map(t => `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card-cq h-100 p-4 d-flex flex-column">
+                                <div class="badge bg-danger-subtle text-danger border align-self-start rounded-pill px-2.5 py-1 mb-2">
+                                    <i class="bi bi-stopwatch me-1"></i>${t.duration_minutes} mins
+                                </div>
+                                <h6 class="fw-bold text-dark mb-2">${t.title}</h6>
+                                <p class="text-muted small flex-grow-1">${t.description || ""}</p>
+                                <a href="mock-tests.html" class="btn btn-sm btn-danger rounded-pill mt-3">Take Assessment</a>
+                            </div>
+                        </div>
+                    `).join("");
+                } else {
+                    testsContainer.innerHTML = `<div class="col-12 text-center py-5 text-muted">No mock tests available for this subject yet.</div>`;
+                }
+            } catch (err) {
+                console.error("Error loading subject hub:", err);
+            }
+        });
+
+        async function openSubjectNote(id) {
+            try {
+                const res = await API.getNote(id);
+                if (res.success) {
+                    const note = res.data;
+                    document.getElementById("modal-note-title").innerText = note.title;
+                    document.getElementById("modal-note-badge").innerText = `Unit ${note.unit}`;
+                    document.getElementById("modal-note-content").innerText = note.content || note.description || "Content in progress.";
+                    const dl = document.getElementById("modal-note-download");
+                    if (note.file_url) {
+                        dl.href = note.file_url;
+                        dl.classList.remove("d-none");
+                    } else {
+                        dl.classList.add("d-none");
+                    }
+                    new bootstrap.Modal(document.getElementById("noteModal")).show();
+                }
+            } catch (e) {
+                Auth.showToast("Could not load note", "error");
+            }
+        }
+        window.openSubjectNote = openSubjectNote;
+    </script>
+</body>
+</html>
