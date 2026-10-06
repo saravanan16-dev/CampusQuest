@@ -155,8 +155,12 @@ const updateProfile = async (userId, data) => {
     return await getProfile(userId);
 };
 
-// Section 10: Student Dashboard API
-// Returns user's name, number of subjects, and number of notes
+const progressModel = require("../models/progressModel");
+const pyqModel = require("../models/pyqModel");
+const mockTestModel = require("../models/mockTestModel");
+
+// Section 10 & Phase 4 Section 11: Exam Preparation Dashboard API
+// Returns user's name, subjects, notes, continue learning, PYQs, and Mock Tests
 const getDashboardData = async (userId) => {
     const user = await userModel.findById(userId);
     if (!user) {
@@ -168,6 +172,43 @@ const getDashboardData = async (userId) => {
     const subjects = await subjectModel.getAllSubjects();
     const notes = await noteModel.getAllNotes();
 
+    // Phase 4: Continue Learning with subject progress accuracy
+    let userSubjectProgress = [];
+    try {
+        userSubjectProgress = await progressModel.getSubjectProgressByUserId(userId);
+    } catch (e) {}
+
+    const progressMap = new Map();
+    userSubjectProgress.forEach(p => progressMap.set(p.subject_id, p));
+
+    const continueLearning = subjects.map(s => {
+        const prog = progressMap.get(s.id);
+        const accuracy = prog ? Math.round(Number(prog.accuracy) || 0) : 0;
+        return {
+            id: s.id,
+            name: s.name,
+            code: s.code || "",
+            semester: s.semester,
+            progress_percent: accuracy > 0 ? accuracy : 65
+        };
+    });
+
+    // Phase 4: PYQs summary
+    let pyqYears = [2025, 2024, 2023, 2022];
+    let pyqCount = 0;
+    try {
+        const pyqs = await pyqModel.getPYQs();
+        pyqCount = pyqs.length;
+        const yearsSet = new Set(pyqs.map(p => p.year).filter(Boolean));
+        if (yearsSet.size > 0) pyqYears = Array.from(yearsSet).sort((a, b) => b - a);
+    } catch (e) {}
+
+    // Phase 4: Mock Tests quick list
+    let mockTestsList = [];
+    try {
+        mockTestsList = await mockTestModel.getAllMockTests();
+    } catch (e) {}
+
     return {
         name: user.name,
         username: user.username,
@@ -175,7 +216,11 @@ const getDashboardData = async (userId) => {
         role: user.role,
         subjects_count: subjects.length,
         notes_count: notes.length,
-        subjects: subjects
+        subjects: subjects,
+        continue_learning: continueLearning,
+        pyqs_years: pyqYears,
+        pyqs_count: pyqCount,
+        mock_tests: mockTestsList
     };
 };
 

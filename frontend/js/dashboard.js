@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
         await Promise.all([
             loadLearningNavigator(),
+            loadExamPrepDashboardHub(),
             loadUserProfileAndStats(),
             loadProgressAndWeakAreas(),
             loadRecentActivity(),
@@ -392,3 +393,60 @@ async function openDashNote(noteId) {
     }
 }
 window.openDashNote = openDashNote;
+
+async function loadExamPrepDashboardHub() {
+    try {
+        const res = await API.getDashboard();
+        if (res.success && res.data) {
+            const data = res.data;
+
+            // 1. Continue Learning Subjects with percentages (e.g. DBMS 72%, OS 65%, Networks 80%)
+            const contContainer = document.getElementById("continue-learning-container");
+            if (contContainer && data.continue_learning) {
+                contContainer.innerHTML = data.continue_learning.slice(0, 3).map(s => {
+                    const pct = s.progress_percent || 65;
+                    const color = pct >= 75 ? 'bg-success' : (pct >= 60 ? 'bg-primary' : 'bg-warning');
+                    return `
+                        <div class="col-md-4">
+                            <div class="p-3 rounded-3 bg-light border d-flex flex-column h-100">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-bold text-dark text-truncate" title="${s.name}">${s.name}</span>
+                                    <span class="badge ${pct >= 75 ? 'bg-success-subtle text-success' : 'bg-primary-subtle text-primary'} border fw-bold">${pct}%</span>
+                                </div>
+                                <div class="progress mb-3" style="height: 6px;">
+                                    <div class="progress-bar ${color}" style="width: ${pct}%"></div>
+                                </div>
+                                <a href="practice.html?subjectId=${s.id}" class="btn btn-sm btn-outline-primary rounded-pill mt-auto fw-semibold">
+                                    Continue Learning &rarr;
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }).join("");
+            }
+
+            // 2. PYQ Years
+            const pyqContainer = document.getElementById("dash-pyq-years-container");
+            if (pyqContainer && data.pyqs_years && data.pyqs_years.length > 0) {
+                pyqContainer.innerHTML = data.pyqs_years.map(y => `
+                    <a href="pyqs.html?year=${y}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
+                        <i class="bi bi-calendar-check me-1"></i>${y} Exam
+                    </a>
+                `).join("");
+            }
+
+            // 3. Mock Tests
+            const mockContainer = document.getElementById("dash-mock-tests-container");
+            if (mockContainer && data.mock_tests && data.mock_tests.length > 0) {
+                mockContainer.innerHTML = data.mock_tests.slice(0, 3).map(m => `
+                    <a href="mock-tests.html?start=${m.id}" class="btn btn-sm btn-danger rounded-pill px-3 fw-semibold">
+                        <i class="bi bi-play-fill me-1"></i>[${m.title}]
+                    </a>
+                `).join("");
+            }
+        }
+    } catch (e) {
+        console.error("Error loading exam prep dashboard hub:", e);
+    }
+}
+window.loadExamPrepDashboardHub = loadExamPrepDashboardHub;

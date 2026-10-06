@@ -122,6 +122,63 @@
             </div>
         </div>
 
+        <!-- Phase 4: Exam Preparation Dashboard Hub -->
+        <div class="card-cq p-4 mb-4 bg-white border shadow-sm rounded-4" id="exam-prep-dashboard-hub">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-mortarboard-fill text-primary me-2"></i>Exam Preparation Hub
+                </h5>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1">
+                    Phase 4: Real Exam Readiness
+                </span>
+            </div>
+
+            <!-- Continue Learning Section -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold text-dark mb-0"><i class="bi bi-play-circle-fill text-success me-2"></i>Continue Learning</h6>
+                    <span class="text-muted small">Subject Mastery Progress</span>
+                </div>
+                <div class="row g-3" id="continue-learning-container">
+                    <!-- Populated dynamically by dashboard.js: DBMS 72%, OS 65%, Networks 80% -->
+                </div>
+            </div>
+
+            <hr class="text-muted my-3">
+
+            <div class="row g-4">
+                <!-- PYQs by Year -->
+                <div class="col-md-6">
+                    <div class="p-3 rounded-3 bg-light border h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold text-dark mb-0"><i class="bi bi-file-earmark-text text-danger me-2"></i>Previous Year Questions (PYQs)</h6>
+                            <a href="pyqs.html" class="small text-decoration-none">View All &rarr;</a>
+                        </div>
+                        <p class="text-muted small mb-3">Targeted university questions organized by year and unit:</p>
+                        <div class="d-flex flex-wrap gap-2" id="dash-pyq-years-container">
+                            <a href="pyqs.html?year=2025" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">2025 Exam</a>
+                            <a href="pyqs.html?year=2024" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">2024 Exam</a>
+                            <a href="pyqs.html?year=2023" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">2023 Exam</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mock Tests Quick Launch -->
+                <div class="col-md-6">
+                    <div class="p-3 rounded-3 bg-light border h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold text-dark mb-0"><i class="bi bi-stopwatch text-warning me-2"></i>Timed Mock Examinations</h6>
+                            <a href="mock-tests.html" class="small text-decoration-none">All Tests &rarr;</a>
+                        </div>
+                        <p class="text-muted small mb-3">Simulate real 30-minute exam conditions with auto-scoring:</p>
+                        <div class="d-flex flex-wrap gap-2" id="dash-mock-tests-container">
+                            <!-- Populated dynamically by dashboard.js: [DBMS Mock Test], [OS Mock Test] -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Phase 2 Learning Navigator: Subject -> Units -> Notes -->
         <div class="card-cq p-4 mb-4 border-primary shadow-sm bg-white">
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">

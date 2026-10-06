@@ -278,6 +278,10 @@ const API = {
         return this.request(`/mock-tests/${attemptId}/result`);
     },
 
+    getMockTestHistory() {
+        return this.request("/mock-tests/history");
+    },
+
     createMockTest(data) {
         return this.request("/mock-tests", {
             method: "POST",
@@ -297,9 +301,20 @@ const API = {
         return this.request(`/pyqs?${query}`);
     },
 
+    getPYQ(id) {
+        return this.request(`/pyqs/${id}`);
+    },
+
     createPYQ(data) {
         return this.request("/pyqs", {
             method: "POST",
+            body: JSON.stringify(data)
+        });
+    },
+
+    updatePYQ(id, data) {
+        return this.request(`/pyqs/${id}`, {
+            method: "PUT",
             body: JSON.stringify(data)
         });
     },

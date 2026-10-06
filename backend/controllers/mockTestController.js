@@ -3,7 +3,7 @@ const mockTestService = require("../services/mockTestService");
 const getMockTests = async (req, res) => {
     try {
         const { subjectId, subject_id } = req.query;
-        const mockTests = await mockTestService.getAllMockTests(subjectId || subject_id);
+        const mockTests = await mockTestService.getAllMockTests(subject_id || subjectId);
         res.json({
             success: true,
             data: mockTests
@@ -42,9 +42,17 @@ const getMockTest = async (req, res) => {
 
 const startMockTest = async (req, res) => {
     try {
+        const mockTestId = req.params.id || req.body.mock_test_id || req.body.mockTestId;
+        if (!mockTestId) {
+            return res.status(400).json({
+                success: false,
+                message: "mock_test_id is required"
+            });
+        }
+
         const data = await mockTestService.startMockTest({
             userId: req.user.id,
-            mockTestId: req.params.id
+            mockTestId
         });
 
         res.status(201).json({
@@ -62,9 +70,15 @@ const startMockTest = async (req, res) => {
 
 const submitMockTest = async (req, res) => {
     try {
-        const attemptId = req.params.id; // or passed in body
-        const { answers, attempt_id } = req.body;
-        const targetAttemptId = attempt_id || attemptId;
+        const attemptId = req.params.id || req.body.attempt_id || req.body.attemptId;
+        const { answers, time_used_seconds, time_taken_seconds } = req.body;
+
+        if (!attemptId) {
+            return res.status(400).json({
+                success: false,
+                message: "attempt_id is required"
+            });
+        }
 
         if (!answers || !Array.isArray(answers)) {
             return res.status(400).json({
@@ -75,8 +89,9 @@ const submitMockTest = async (req, res) => {
 
         const data = await mockTestService.submitMockTest({
             userId: req.user.id,
-            attemptId: targetAttemptId,
-            answers
+            attemptId,
+            answers,
+            timeUsedSeconds: time_used_seconds || time_taken_seconds || 0
         });
 
         res.json({
@@ -94,7 +109,8 @@ const submitMockTest = async (req, res) => {
 
 const getMockTestResult = async (req, res) => {
     try {
-        const data = await mockTestService.getMockTestResult(req.params.id, req.user.id);
+        const attemptId = req.params.id || req.query.attempt_id || req.params.attemptId;
+        const data = await mockTestService.getMockTestResult(attemptId, req.user.id);
         res.json({
             success: true,
             data
@@ -126,9 +142,22 @@ const getUserTestHistory = async (req, res) => {
 
 const createMockTest = async (req, res) => {
     try {
-        const { title, subject_id, duration_minutes, total_marks, passing_marks, description, question_ids, marks_per_question } = req.body;
+        const {
+            title,
+            subject_id,
+            subjectId,
+            duration,
+            duration_minutes,
+            total_questions,
+            total_marks,
+            passing_marks,
+            description,
+            question_ids,
+            marks_per_question
+        } = req.body;
 
-        if (!title || !subject_id) {
+        const targetSubId = subject_id || subjectId;
+        if (!title || !targetSubId) {
             return res.status(400).json({
                 success: false,
                 message: "Title and subject_id are required"
@@ -137,8 +166,10 @@ const createMockTest = async (req, res) => {
 
         const mockTest = await mockTestService.createMockTest({
             title,
-            subject_id,
-            duration_minutes,
+            subject_id: targetSubId,
+            duration: duration || duration_minutes || 30,
+            duration_minutes: duration || duration_minutes || 30,
+            total_questions,
             total_marks,
             passing_marks,
             description,

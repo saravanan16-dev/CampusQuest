@@ -371,6 +371,10 @@ const initDatabase = async () => {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         `);
 
+        // Run Phase 4 DB schema migrations
+        const migratePhase4 = require("./migratePhase4");
+        await migratePhase4();
+
         console.log("All tables checked/created successfully.");
 
         // SEED ACHIEVEMENTS

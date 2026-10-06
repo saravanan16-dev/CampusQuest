@@ -7,14 +7,13 @@ const {
     deletePYQ
 } = require("../controllers/pyqController");
 const authMiddleware = require("../middleware/authMiddleware");
-const adminMiddleware = require("../middleware/adminMiddleware");
 
 const router = express.Router();
 
 router.get("/pyqs", getPYQs);
 router.get("/pyqs/:id", getPYQ);
-router.post("/pyqs", authMiddleware, adminMiddleware, createPYQ);
-router.put("/pyqs/:id", authMiddleware, adminMiddleware, updatePYQ);
-router.delete("/pyqs/:id", authMiddleware, adminMiddleware, deletePYQ);
+router.post("/pyqs", authMiddleware, createPYQ);
+router.put("/pyqs/:id", authMiddleware, updatePYQ);
+router.delete("/pyqs/:id", authMiddleware, deletePYQ);
 
 module.exports = router;

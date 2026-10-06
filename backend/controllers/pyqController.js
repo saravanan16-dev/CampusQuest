@@ -2,11 +2,14 @@ const pyqService = require("../services/pyqService");
 
 const getPYQs = async (req, res) => {
     try {
-        const { subjectId, subject_id, year, regulation, semester } = req.query;
+        const { subjectId, subject_id, unitId, unit_id, year, marks, regulation, exam_type, semester } = req.query;
         const pyqs = await pyqService.getPYQs({
-            subject_id: subjectId || subject_id,
+            subject_id: subject_id || subjectId,
+            unit_id: unit_id || unitId,
             year,
+            marks,
             regulation,
+            exam_type,
             semester
         });
 
@@ -29,7 +32,7 @@ const getPYQ = async (req, res) => {
         if (!pyq) {
             return res.status(404).json({
                 success: false,
-                message: "Previous year question paper not found"
+                message: "Previous year question not found"
             });
         }
 
@@ -48,23 +51,46 @@ const getPYQ = async (req, res) => {
 
 const createPYQ = async (req, res) => {
     try {
-        const { subject_id, regulation, year, semester, exam_type, title, file_url } = req.body;
+        const {
+            subject_id,
+            subjectId,
+            unit_id,
+            unitId,
+            question,
+            question_text,
+            year,
+            exam_type,
+            regulation,
+            marks,
+            question_number,
+            title,
+            file_url,
+            semester
+        } = req.body;
 
-        if (!subject_id || !regulation || !year || !semester || !title) {
+        const targetSubjectId = subject_id || subjectId;
+        const targetUnitId = unit_id || unitId;
+        const targetQuestion = question || question_text || title;
+
+        if (!targetSubjectId || !year || !targetQuestion) {
             return res.status(400).json({
                 success: false,
-                message: "Subject ID, regulation, year, semester, and title are required"
+                message: "subject_id, year, and question (or title) are required"
             });
         }
 
         const id = await pyqService.createPYQ({
-            subject_id,
-            regulation,
+            subject_id: targetSubjectId,
+            unit_id: targetUnitId,
+            question: targetQuestion,
             year,
-            semester,
-            exam_type,
-            title,
-            file_url
+            exam_type: exam_type || "Regular",
+            regulation: regulation || "2021",
+            marks: marks !== undefined ? marks : 13,
+            question_number,
+            title: title || targetQuestion,
+            file_url,
+            semester
         });
 
         const created = await pyqService.getPYQById(id);
