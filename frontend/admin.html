@@ -190,12 +190,13 @@
                                     <input type="text" class="form-control" id="note-desc">
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label small fw-semibold">File URL / PDF Link</label>
+                                    <label class="form-label small fw-semibold">PDF URL (optional)</label>
                                     <input type="text" class="form-control" id="note-file-url" placeholder="/uploads/notes/file.pdf">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label small fw-semibold">Notes Content (Markdown/Text)</label>
-                                    <textarea class="form-control" id="note-content" rows="4"></textarea>
+                                    <textarea class="form-control" id="note-content" rows="4" placeholder="Students can view this content as a PDF when no PDF URL is supplied."></textarea>
+                                    <div class="form-text">If you don't provide a PDF URL, students will automatically get a PDF generated from this note's content.</div>
                                 </div>
                                 <button type="submit" class="btn btn-primary rounded-pill w-100 fw-semibold">Save Note</button>
                             </form>

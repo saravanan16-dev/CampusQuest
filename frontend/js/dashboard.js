@@ -346,14 +346,15 @@ async function selectNavUnit(subjectId, unitId, el) {
                     </div>
                     <p class="text-muted small mb-2 text-truncate" style="font-size: 0.75rem;">${n.description || "Comprehensive syllabus notes"}</p>
                     <div class="d-flex gap-1">
-                        <button class="btn btn-sm btn-primary rounded-pill flex-grow-1 py-0.5" style="font-size: 0.72rem;" onclick="openDashNote(${n.id})">
+                        <button class="btn btn-sm btn-outline-primary rounded-pill flex-grow-1 py-0.5" style="font-size: 0.72rem;" onclick="openDashNote(${n.id}, 'text')">
                             <i class="bi bi-book-half me-1"></i>Read
                         </button>
-                        ${n.file_url ? `
-                            <a href="${n.file_url}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-0.5" style="font-size: 0.72rem;">
-                                <i class="bi bi-download"></i>
-                            </a>
-                        ` : ''}
+                        <button class="btn btn-sm btn-danger rounded-pill px-2 py-0.5" style="font-size: 0.72rem;" onclick="openDashNote(${n.id}, 'pdf')" title="View in PDF format">
+                            <i class="bi bi-file-earmark-pdf-fill me-1"></i>PDF
+                        </button>
+                        <a href="/notes/${n.id}/pdf?download=1" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-0.5" style="font-size: 0.72rem;" title="Download PDF">
+                            <i class="bi bi-download"></i>
+                        </a>
                     </div>
                 </div>
             `).join("");
@@ -371,21 +372,15 @@ async function selectNavUnit(subjectId, unitId, el) {
 }
 window.selectNavUnit = selectNavUnit;
 
-async function openDashNote(noteId) {
+async function openDashNote(noteId, initialMode = "pdf") {
     try {
         const res = await API.getNote(noteId);
         if (res.success) {
             const note = res.data;
             document.getElementById("dash-modal-note-title").innerText = note.title;
             document.getElementById("dash-modal-note-badge").innerText = `Unit ${note.unit_number || note.unit}: ${note.subject_name}`;
-            document.getElementById("dash-modal-note-content").innerText = note.content || note.description || "Note content preview.";
-            const dl = document.getElementById("dash-modal-note-download");
-            if (note.file_url) {
-                dl.href = note.file_url;
-                dl.classList.remove("d-none");
-            } else {
-                dl.classList.add("d-none");
-            }
+
+            showNotePdf(note, "dash-modal-note", initialMode);
             new bootstrap.Modal(document.getElementById("dashNoteModal")).show();
         }
     } catch (e) {

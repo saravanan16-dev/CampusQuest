@@ -5,9 +5,11 @@ const {
     getNote,
     createNote,
     updateNote,
-    deleteNote
+    deleteNote,
+    getNotePdf
 } = require("../controllers/noteController");
 const authMiddleware = require("../middleware/authMiddleware");
+const adminMiddleware = require("../middleware/adminMiddleware");
 
 const router = express.Router();
 
@@ -18,6 +20,8 @@ router.get("/units/:id/notes", (req, res, next) => {
 });
 router.get("/notes", getAllNotes);
 router.get("/notes/:id", getNote);
+router.get("/notes/:id/pdf", getNotePdf);
+router.get("/subjects/:subjectId/notes/:id/pdf", getNotePdf);
 router.post("/notes", authMiddleware, createNote);
 router.put("/notes/:id", authMiddleware, updateNote);
 router.delete("/notes/:id", authMiddleware, deleteNote);

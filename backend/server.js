@@ -20,6 +20,15 @@ const progressRoutes = require("./routes/progressRoutes");
 const gamificationRoutes = require("./routes/gamificationRoutes");
 const leaderboardRoutes = require("./routes/leaderboardRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const adminSubjectRoutes = require("./routes/adminSubjectRoutes");
+const adminUnitRoutes = require("./routes/adminUnitRoutes");
+const adminNoteRoutes = require("./routes/adminNoteRoutes");
+const adminQuestionRoutes = require("./routes/adminQuestionRoutes");
+const adminPyqRoutes = require("./routes/adminPyqRoutes");
+const adminMockTestRoutes = require("./routes/adminMockTestRoutes");
+const adminUserRoutes = require("./routes/adminUserRoutes");
+const authMiddleware = require("./middleware/authMiddleware");
+const adminMiddleware = require("./middleware/adminMiddleware");
 const aiRoutes = require("./routes/aiRoutes");
 
 const app = express();
@@ -57,6 +66,14 @@ app.use("/", progressRoutes);
 app.use("/", gamificationRoutes);
 app.use("/", leaderboardRoutes);
 app.use("/", adminRoutes);
+// Every content-management API is protected once at its /admin boundary.
+app.use("/admin/subjects", authMiddleware, adminMiddleware, adminSubjectRoutes);
+app.use("/admin/units", authMiddleware, adminMiddleware, adminUnitRoutes);
+app.use("/admin/notes", authMiddleware, adminMiddleware, adminNoteRoutes);
+app.use("/admin/questions", authMiddleware, adminMiddleware, adminQuestionRoutes);
+app.use("/admin/pyqs", authMiddleware, adminMiddleware, adminPyqRoutes);
+app.use("/admin/mock-tests", authMiddleware, adminMiddleware, adminMockTestRoutes);
+app.use("/admin/users", authMiddleware, adminMiddleware, adminUserRoutes);
 app.use("/", aiRoutes);
 
 // Global Error Handler conforming to API standard

@@ -21,7 +21,7 @@ const generateToken = (user) => {
     );
 };
 
-const register = async ({ username, name, email, password, role = "STUDENT" }) => {
+const register = async ({ username, name, email, password }) => {
     // 1. Check existing email
     const existingEmail = await userModel.findByEmail(email);
     if (existingEmail) {
@@ -47,7 +47,8 @@ const register = async ({ username, name, email, password, role = "STUDENT" }) =
         name,
         email,
         password: hashedPassword,
-        role: role.toUpperCase() === "ADMIN" ? "ADMIN" : "STUDENT"
+        // Public registration must never be allowed to grant administrative access.
+        role: "STUDENT"
     });
 
     // 5. Initialize streak & welcome bonus XP
@@ -78,6 +79,12 @@ const login = async ({ emailOrUsername, password }) => {
     if (!user) {
         const error = new Error("Invalid email or password");
         error.statusCode = 401;
+        throw error;
+    }
+
+    if (!user.is_active) {
+        const error = new Error("This account has been disabled. Please contact an administrator.");
+        error.statusCode = 403;
         throw error;
     }
 

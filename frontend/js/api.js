@@ -192,6 +192,10 @@ const API = {
         return this.request(`/notes/${id}`);
     },
 
+    getNotePdfUrl(id, download = false) {
+        return `/notes/${id}/pdf${download ? '?download=1' : ''}`;
+    },
+
     createNote(noteData) {
         return this.request("/notes", {
             method: "POST",

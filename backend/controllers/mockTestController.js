@@ -213,6 +213,16 @@ const deleteMockTest = async (req, res) => {
     }
 };
 
+const updateMockTest = async (req, res) => {
+    try {
+        const mockTest = await mockTestService.updateMockTest(req.params.id, req.body);
+        if (!mockTest) return res.status(404).json({ success: false, message: "Mock test not found" });
+        res.json({ success: true, data: mockTest });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Database error while updating mock test" });
+    }
+};
+
 module.exports = {
     getMockTests,
     getMockTest,
@@ -221,5 +231,6 @@ module.exports = {
     getMockTestResult,
     getUserTestHistory,
     createMockTest,
-    deleteMockTest
+    deleteMockTest,
+    updateMockTest
 };

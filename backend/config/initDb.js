@@ -14,6 +14,7 @@ const initDatabase = async () => {
                 email VARCHAR(100) UNIQUE NOT NULL,
                 password VARCHAR(255) NOT NULL,
                 role ENUM('STUDENT', 'ADMIN') DEFAULT 'STUDENT',
+                is_active BOOLEAN NOT NULL DEFAULT TRUE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -33,6 +34,9 @@ const initDatabase = async () => {
         }
         if (!userColNames.includes("semester")) {
             await db.query("ALTER TABLE users ADD COLUMN semester INT NULL AFTER year");
+        }
+        if (!userColNames.includes("is_active")) {
+            await db.query("ALTER TABLE users ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE AFTER role");
         }
 
         // 2. subjects table - check if description and semester columns exist

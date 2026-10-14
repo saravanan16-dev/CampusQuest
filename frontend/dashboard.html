@@ -311,22 +311,44 @@
     </div>
 
     <!-- Note Reader Modal -->
+    <!-- Note Reader Modal with PDF & Text Formats -->
     <div class="modal fade" id="dashNoteModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header bg-dark text-white">
+                <div class="modal-header bg-dark text-white d-flex justify-content-between align-items-center">
                     <div>
                         <span class="badge bg-primary rounded-pill mb-1" id="dash-modal-note-badge">Unit 1</span>
-                        <h5 class="modal-title fw-bold" id="dash-modal-note-title">Note Title</h5>
+                        <h5 class="modal-title fw-bold mb-0" id="dash-modal-note-title">Note Title</h5>
                     </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Format View Switcher -->
+                        <div class="btn-group btn-group-sm me-2" role="group">
+                            <button type="button" class="btn btn-primary active" id="dash-modal-note-tab-pdf" onclick="setNoteViewMode('dash-modal-note', 'pdf')">
+                                <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i>PDF Format
+                            </button>
+                            <button type="button" class="btn btn-outline-light" id="dash-modal-note-tab-text" onclick="setNoteViewMode('dash-modal-note', 'text')">
+                                <i class="bi bi-text-left me-1"></i>Text Format
+                            </button>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
                 </div>
-                <div class="modal-body p-4">
-                    <div id="dash-modal-note-content" class="lh-lg" style="white-space: pre-wrap;"></div>
+                <div class="modal-body p-3 p-md-4">
+                    <div id="dash-modal-note-viewer" class="mb-2">
+                        <iframe id="dash-modal-note-pdf-frame" src="" style="width:100%; height: 620px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc;" title="Note PDF Viewer"></iframe>
+                    </div>
+                    <div id="dash-modal-note-content" class="lh-lg p-3 bg-white border rounded-3 d-none" style="white-space: pre-wrap;"></div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <a href="#" id="dash-modal-note-download" class="btn btn-outline-primary rounded-pill" target="_blank">Download PDF</a>
-                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Close</button>
+                <div class="modal-footer bg-light justify-content-between">
+                    <div class="d-flex gap-2">
+                        <a href="#" id="dash-modal-note-open" class="btn btn-primary rounded-pill px-3" target="_blank">
+                            <i class="bi bi-box-arrow-up-right me-1"></i>Open PDF in New Tab
+                        </a>
+                        <a href="#" id="dash-modal-note-download" class="btn btn-outline-primary rounded-pill px-3" target="_blank">
+                            <i class="bi bi-download me-1"></i>Download PDF
+                        </a>
+                    </div>
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -342,6 +364,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/note-pdf.js"></script>
     <script src="js/dashboard.js"></script>
 </body>
 </html>

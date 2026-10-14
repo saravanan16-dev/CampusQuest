@@ -370,6 +370,11 @@ const deleteMockTest = async (id) => {
     return await mockTestModel.deleteMockTest(id);
 };
 
+const updateMockTest = async (id, data) => {
+    const result = await mockTestModel.updateMockTest(id, data);
+    return result.affectedRows ? mockTestModel.getMockTestById(id) : null;
+};
+
 module.exports = {
     getAllMockTests,
     getMockTestById,
@@ -378,5 +383,6 @@ module.exports = {
     getMockTestResult,
     getUserTestHistory,
     createMockTest,
-    deleteMockTest
+    deleteMockTest,
+    updateMockTest
 };

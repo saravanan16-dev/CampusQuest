@@ -10,6 +10,7 @@ const {
     deleteMockTest
 } = require("../controllers/mockTestController");
 const authMiddleware = require("../middleware/authMiddleware");
+const adminMiddleware = require("../middleware/adminMiddleware");
 
 const router = express.Router();
 

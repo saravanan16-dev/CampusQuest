@@ -105,39 +105,33 @@ function renderNotes(notes) {
                     ${n.description || "In-depth conceptual guide with key formulas, diagrams, and exam revision highlights."}
                 </p>
 
-                <div class="d-flex gap-2 pt-3 border-top mt-3">
-                    <button class="btn btn-sm btn-primary rounded-pill px-3 flex-grow-1" onclick="openNoteReader(${n.id})">
+                <div class="d-flex flex-wrap gap-2 pt-3 border-top mt-3">
+                    <button class="btn btn-sm btn-primary rounded-pill px-3 flex-grow-1" onclick="openNoteReader(${n.id}, 'text')">
                         <i class="bi bi-book-half me-1"></i>Read Notes
                     </button>
-                    ${n.file_url ? `
-                        <a href="${n.file_url}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" title="Download PDF">
-                            <i class="bi bi-download"></i>
-                        </a>
-                    ` : ''}
+                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="openNoteReader(${n.id}, 'pdf')" title="View in PDF format">
+                        <i class="bi bi-file-earmark-pdf-fill me-1"></i>View PDF
+                    </button>
+                    <a href="/notes/${n.id}/pdf?download=1" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" title="Download PDF" target="_blank">
+                        <i class="bi bi-download"></i>
+                    </a>
                 </div>
             </div>
         </div>
     `).join("");
 }
 
-async function openNoteReader(id) {
+async function openNoteReader(id, initialMode = "pdf") {
     try {
         const res = await API.getNote(id);
         if (res.success) {
             const note = res.data;
             document.getElementById("modal-note-title").innerText = note.title;
-            document.getElementById("modal-note-badge").innerText = `Unit ${note.unit}`;
+            document.getElementById("modal-note-badge").innerText = `Unit ${note.unit_number || note.unit}`;
             document.getElementById("modal-note-subject").innerText = `Subject: ${note.subject_name}`;
             document.getElementById("modal-note-date").innerText = `Added: ${new Date(note.created_at).toLocaleDateString()}`;
-            document.getElementById("modal-note-content").innerText = note.content || note.description || "Notes content is being digitized.";
 
-            const downloadBtn = document.getElementById("modal-note-download");
-            if (note.file_url) {
-                downloadBtn.href = note.file_url;
-                downloadBtn.classList.remove("d-none");
-            } else {
-                downloadBtn.classList.add("d-none");
-            }
+            showNotePdf(note, "modal-note", initialMode);
 
             const modal = new bootstrap.Modal(document.getElementById("noteModal"));
             modal.show();
@@ -147,3 +141,8 @@ async function openNoteReader(id) {
     }
 }
 window.openNoteReader = openNoteReader;
+
+function openNotePdf(id) {
+    window.open(`/notes/${id}/pdf`, "_blank");
+}
+window.openNotePdf = openNotePdf;

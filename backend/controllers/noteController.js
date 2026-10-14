@@ -157,11 +157,49 @@ const deleteNote = async (req, res) => {
     }
 };
 
+const { generateNotePdf } = require("../services/notePdfService");
+
+const getNotePdf = async (req, res) => {
+    try {
+        const note = await noteService.getNoteById(req.params.id);
+        if (!note) {
+            return res.status(404).json({
+                success: false,
+                message: "Note not found"
+            });
+        }
+
+        const isDownload = req.query.download === "1" || req.query.download === "true";
+        const sanitizedTitle = (note.title || "CampusQuest_Note")
+            .replace(/[^a-zA-Z0-9_-]/g, "_")
+            .substring(0, 60);
+        const filename = `${sanitizedTitle}.pdf`;
+
+        const pdfBuffer = await generateNotePdf(note);
+
+        res.set({
+            "Content-Type": "application/pdf",
+            "Content-Disposition": `${isDownload ? "attachment" : "inline"}; filename="${filename}"`,
+            "Content-Length": pdfBuffer.length,
+            "Cache-Control": "public, max-age=300"
+        });
+
+        res.send(pdfBuffer);
+    } catch (error) {
+        console.error("Get note PDF error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Error generating note PDF document"
+        });
+    }
+};
+
 module.exports = {
     getAllNotes,
     getNotesBySubject,
     getNote,
     createNote,
     updateNote,
-    deleteNote
+    deleteNote,
+    getNotePdf
 };

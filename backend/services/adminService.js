@@ -13,8 +13,11 @@ const updateUserRole = async (userId, role) => {
     return await userModel.updateUserRole(userId, role);
 };
 
+const updateUserStatus = async (userId, isActive) => userModel.updateUserStatus(userId, isActive);
+
 module.exports = {
     getAnalytics,
     getAllUsers,
-    updateUserRole
+    updateUserRole,
+    updateUserStatus
 };

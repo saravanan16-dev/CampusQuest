@@ -97,6 +97,16 @@ const deleteMockTest = async (id) => {
     return result;
 };
 
+const updateMockTest = async (id, { title, subject_id, duration_minutes, total_marks, passing_marks, description }) => {
+    const [result] = await db.query(
+        `UPDATE mock_tests SET title = COALESCE(?, title), subject_id = COALESCE(?, subject_id),
+         duration_minutes = COALESCE(?, duration_minutes), total_marks = COALESCE(?, total_marks),
+         passing_marks = COALESCE(?, passing_marks), description = COALESCE(?, description) WHERE id = ?`,
+        [title, subject_id, duration_minutes, total_marks, passing_marks, description, id]
+    );
+    return result;
+};
+
 const createTestAttempt = async ({ user_id, mock_test_id, total_marks, total_questions }) => {
     const [result] = await db.query(
         `INSERT INTO test_attempts (user_id, mock_test_id, total_marks, total_questions, score, started_at, start_time, status)
@@ -202,6 +212,7 @@ module.exports = {
     addQuestionToMockTest,
     removeQuestionFromMockTest,
     deleteMockTest,
+    updateMockTest,
     createTestAttempt,
     getTestAttemptById,
     saveTestAnswer,

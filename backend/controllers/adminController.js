@@ -56,8 +56,25 @@ const updateUserRole = async (req, res) => {
     }
 };
 
+const updateUserStatus = async (req, res) => {
+    try {
+        if (typeof req.body.is_active !== "boolean") {
+            return res.status(400).json({ success: false, message: "is_active must be true or false" });
+        }
+        if (Number(req.params.id) === req.user.id && !req.body.is_active) {
+            return res.status(400).json({ success: false, message: "You cannot disable your own account" });
+        }
+        const result = await adminService.updateUserStatus(req.params.id, req.body.is_active);
+        if (!result.affectedRows) return res.status(404).json({ success: false, message: "User not found" });
+        res.json({ success: true, message: `User ${req.body.is_active ? "enabled" : "disabled"}` });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Database error while updating account status" });
+    }
+};
+
 module.exports = {
     getAnalytics,
     getUsers,
-    updateUserRole
+    updateUserRole,
+    updateUserStatus
 };

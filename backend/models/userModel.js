@@ -24,7 +24,7 @@ const findByEmailOrUsername = async (identifier) => {
 
 const findById = async (id) => {
     const [rows] = await db.query(
-        "SELECT id, username, name, email, role, college, department, year, semester, created_at, updated_at FROM users WHERE id = ?",
+        "SELECT id, username, name, email, role, is_active, college, department, year, semester, created_at, updated_at FROM users WHERE id = ?",
         [id]
     );
     return rows[0];
@@ -56,7 +56,7 @@ const updateUser = async (id, { name, email, college, department, year, semester
 
 const getAllUsers = async () => {
     const [rows] = await db.query(
-        "SELECT id, username, name, email, role, college, department, year, semester, created_at FROM users ORDER BY created_at DESC"
+        "SELECT id, username, name, email, role, is_active, college, department, year, semester, created_at FROM users ORDER BY created_at DESC"
     );
     return rows;
 };
@@ -69,6 +69,11 @@ const updateUserRole = async (id, role) => {
     return result;
 };
 
+const updateUserStatus = async (id, isActive) => {
+    const [result] = await db.query("UPDATE users SET is_active = ? WHERE id = ?", [isActive ? 1 : 0, id]);
+    return result;
+};
+
 module.exports = {
     findByEmail,
     findByUsername,
@@ -77,5 +82,6 @@ module.exports = {
     createUser,
     updateUser,
     getAllUsers,
-    updateUserRole
+    updateUserRole,
+    updateUserStatus
 };
