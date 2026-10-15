@@ -375,6 +375,62 @@ const initDatabase = async () => {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         `);
 
+        // Forum tables (Discussion Forum feature)
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS forum_posts (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                subject_id INT NULL,
+                unit_id INT NULL,
+                title VARCHAR(500) NOT NULL,
+                body LONGTEXT NOT NULL,
+                tags VARCHAR(255) NULL,
+                status ENUM('OPEN','SOLVED','CLOSED') DEFAULT 'OPEN',
+                accepted_reply_id INT NULL,
+                views INT DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE SET NULL,
+                FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE SET NULL,
+                INDEX idx_forum_subject (subject_id),
+                INDEX idx_forum_status (status)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        `);
+
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS forum_replies (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                post_id INT NOT NULL,
+                user_id INT NOT NULL,
+                parent_reply_id INT NULL,
+                body LONGTEXT NOT NULL,
+                is_accepted BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                FOREIGN KEY (post_id) REFERENCES forum_posts(id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (parent_reply_id) REFERENCES forum_replies(id) ON DELETE SET NULL,
+                INDEX idx_replies_post (post_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        `);
+
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS forum_votes (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                post_id INT NULL,
+                reply_id INT NULL,
+                vote_type ENUM('UP','DOWN') NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (post_id) REFERENCES forum_posts(id) ON DELETE CASCADE,
+                FOREIGN KEY (reply_id) REFERENCES forum_replies(id) ON DELETE CASCADE,
+                UNIQUE KEY unique_post_vote (user_id, post_id),
+                UNIQUE KEY unique_reply_vote (user_id, reply_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        `);
+
         // Run Phase 4 DB schema migrations
         const migratePhase4 = require("./migratePhase4");
         await migratePhase4();
@@ -844,6 +900,55 @@ const initDatabase = async () => {
                 `, [mockTestId, q.id]);
             }
             console.log("Sample mock test created.");
+        }
+
+        // SEED SAMPLE FORUM POSTS & REPLIES
+        const [forumCount] = await db.query("SELECT COUNT(*) AS cnt FROM forum_posts");
+        if (forumCount[0].cnt === 0 && subMap["Database Management Systems"]) {
+            const dbmsId = subMap["Database Management Systems"];
+            const osId = subMap["Operating Systems"] || null;
+            const [studentUser] = await db.query("SELECT id FROM users WHERE role = 'STUDENT' LIMIT 1");
+            const studentId = studentUser[0] ? studentUser[0].id : adminId;
+
+            // 1. Solved question with teacher answer
+            const [p1] = await db.query(`
+                INSERT INTO forum_posts (user_id, subject_id, title, body, tags, status, views)
+                VALUES (?, ?, 'Difference between B-Tree and B+ Tree indexing in DBMS?',
+                        'Can someone clearly explain when to choose B-Tree vs B+ Tree for database indexing? Why do relational databases like MySQL InnoDB predominantly use B+ Trees instead of B-Trees?',
+                        'dbms, indexing, b-tree, b-plus-tree', 'OPEN', 14)
+            `, [studentId, dbmsId]);
+            const post1Id = p1.insertId;
+
+            // Teacher reply (by admin)
+            const [r1] = await db.query(`
+                INSERT INTO forum_replies (post_id, user_id, body, is_accepted)
+                VALUES (?, ?, 'Great question! Here is the fundamental difference:\n\n1. Data Storage: In a B-Tree, keys and data records are stored in both internal and leaf nodes. In a B+ Tree, internal nodes only store routing keys, and ALL actual data/pointers reside strictly in leaf nodes.\n\n2. Range Queries: B+ Tree leaf nodes are linked together sequentially (doubly-linked list). This allows rapid range scans (e.g., BETWEEN queries) without repeatedly traversing back up the tree.\n\n3. Fanout & Cache: Because internal nodes store no data pointers, each disk page holds far more keys. Higher fanout means a shallower tree (usually depth 3-4 even for millions of rows), resulting in fewer disk I/Os.\n\nThat is why MySQL InnoDB and most RDBMS engines use B+ Trees for indexing.', TRUE)
+            `, [post1Id, adminId]);
+            const reply1Id = r1.insertId;
+
+            // Mark post as solved with accepted reply
+            await db.query(`
+                UPDATE forum_posts SET status = 'SOLVED', accepted_reply_id = ? WHERE id = ?
+            `, [reply1Id, post1Id]);
+
+            // Upvotes
+            await db.query(`
+                INSERT INTO forum_votes (user_id, post_id, vote_type) VALUES (?, ?, 'UP')
+            `, [adminId, post1Id]);
+            await db.query(`
+                INSERT INTO forum_votes (user_id, reply_id, vote_type) VALUES (?, ?, 'UP')
+            `, [studentId, reply1Id]);
+
+            // 2. Open question
+            if (osId) {
+                await db.query(`
+                    INSERT INTO forum_posts (user_id, subject_id, title, body, tags, status, views)
+                    VALUES (?, ?, 'How does the OS kernel handle a Page Fault interrupt step-by-step?',
+                            'When a process references a page marked invalid in the page table, what is the exact sequence of hardware trap and OS steps before execution resumes?',
+                            'os, memory-management, paging, kernel', 'OPEN', 5)
+                `, [studentId, osId]);
+            }
+            console.log("Sample forum doubts and teacher answers seeded.");
         }
 
         console.log("Database initialized and seeded successfully!");

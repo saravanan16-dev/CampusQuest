@@ -401,6 +401,45 @@ const API = {
 
     getExamIntelligence(subjectId) {
         return this.request(`/ai/exam-intelligence/${subjectId}`);
+    },
+
+    // Discussion Forum
+    getForumPosts(params = {}) {
+        const query = new URLSearchParams(params).toString();
+        return this.request(`/forum?${query}`);
+    },
+    getForumPost(id) {
+        return this.request(`/forum/${id}`);
+    },
+    createForumPost(data) {
+        return this.request('/forum', { method: 'POST', body: JSON.stringify(data) });
+    },
+    updateForumPost(id, data) {
+        return this.request(`/forum/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+    },
+    deleteForumPost(id) {
+        return this.request(`/forum/${id}`, { method: 'DELETE' });
+    },
+    markForumPostSolved(id, reply_id) {
+        return this.request(`/forum/${id}/solve`, { method: 'PUT', body: JSON.stringify({ reply_id }) });
+    },
+    getForumReplies(postId) {
+        return this.request(`/forum/${postId}/replies`);
+    },
+    createForumReply(postId, data) {
+        return this.request(`/forum/${postId}/replies`, { method: 'POST', body: JSON.stringify(data) });
+    },
+    updateForumReply(replyId, data) {
+        return this.request(`/forum/replies/${replyId}`, { method: 'PUT', body: JSON.stringify(data) });
+    },
+    deleteForumReply(replyId) {
+        return this.request(`/forum/replies/${replyId}`, { method: 'DELETE' });
+    },
+    voteForumPost(postId, vote_type) {
+        return this.request(`/forum/${postId}/vote`, { method: 'POST', body: JSON.stringify({ vote_type }) });
+    },
+    voteForumReply(replyId, vote_type) {
+        return this.request(`/forum/replies/${replyId}/vote`, { method: 'POST', body: JSON.stringify({ vote_type }) });
     }
 };
 

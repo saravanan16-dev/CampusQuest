@@ -30,6 +30,7 @@ const adminUserRoutes = require("./routes/adminUserRoutes");
 const authMiddleware = require("./middleware/authMiddleware");
 const adminMiddleware = require("./middleware/adminMiddleware");
 const aiRoutes = require("./routes/aiRoutes");
+const forumRoutes = require("./routes/forumRoutes");
 
 const app = express();
 
@@ -74,6 +75,7 @@ app.use("/admin/questions", authMiddleware, adminMiddleware, adminQuestionRoutes
 app.use("/admin/pyqs", authMiddleware, adminMiddleware, adminPyqRoutes);
 app.use("/admin/mock-tests", authMiddleware, adminMiddleware, adminMockTestRoutes);
 app.use("/admin/users", authMiddleware, adminMiddleware, adminUserRoutes);
+app.use("/", forumRoutes);
 app.use("/", aiRoutes);
 
 // Global Error Handler conforming to API standard
