@@ -4,7 +4,9 @@
  * and global error toast alerts.
  */
 
-const API_BASE_URL = window.location.origin;
+const API_BASE_URL = (typeof window !== "undefined" && window.location.origin && window.location.origin !== "null" && (window.location.port === "5000" || window.location.port === ""))
+    ? window.location.origin
+    : "http://localhost:5000";
 
 const API = {
     getToken() {

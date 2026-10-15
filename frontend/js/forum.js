@@ -152,16 +152,18 @@ function renderPost(post) {
     const authorDate = `Asked by ${escapeHtml(post.author_name || 'Anonymous')} · ${timeAgo(post.created_at)}`;
 
     return `
-    <div class="card-cq mb-3">
+    <div class="card-cq mb-3 shadow-sm forum-card" style="cursor: pointer;" onclick="if (!event.target.closest('a, button')) window.location.href='forum-post.html?id=${post.id}'">
         <div class="card-body">
             <div class="d-flex gap-3">
                 <!-- Vote / Reply counts -->
-                <div class="text-center flex-shrink-0" style="min-width:50px">
-                    <div class="fw-bold fs-5" id="vote-count-${post.id}">${post.vote_count || 0}</div>
-                    <div class="small text-muted">votes</div>
-                    <div class="mt-2">
-                        <div class="fw-bold">${post.reply_count || 0}</div>
-                        <div class="small text-muted">replies</div>
+                <div class="text-center flex-shrink-0" style="min-width:60px">
+                    <div class="p-2 rounded bg-light border">
+                        <div class="fw-bold fs-5 text-dark" id="vote-count-${post.id}">${post.vote_count || 0}</div>
+                        <div class="small text-muted" style="font-size: 0.75rem;">votes</div>
+                        <div class="mt-2 pt-2 border-top">
+                            <div class="fw-bold text-primary">${post.reply_count || 0}</div>
+                            <div class="small text-muted" style="font-size: 0.75rem;">answers</div>
+                        </div>
                     </div>
                 </div>
                 <!-- Content -->
@@ -170,15 +172,20 @@ function renderPost(post) {
                         ${statusBadge}
                         ${tags}
                     </div>
-                    <h5 class="mb-1">
-                        <a href="forum-post.html?id=${post.id}" class="text-decoration-none">
+                    <h5 class="mb-1 fw-bold">
+                        <a href="forum-post.html?id=${post.id}" class="text-decoration-none text-dark hover-primary">
                             ${escapeHtml(post.title)}
                         </a>
                     </h5>
-                    <p class="text-muted small mb-2">${truncatedBody}</p>
-                    <div class="d-flex justify-content-between align-items-center text-muted small flex-wrap gap-1">
-                        <span>${escapeHtml(subjectUnit)}</span>
-                        <span>${authorDate}</span>
+                    <p class="text-muted small mb-2" style="line-height: 1.5;">${truncatedBody}</p>
+                    <div class="d-flex justify-content-between align-items-center text-muted small flex-wrap gap-2 pt-2 border-top">
+                        <span><i class="bi bi-book me-1"></i>${escapeHtml(subjectUnit || 'General Engineering')}</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <span>${authorDate}</span>
+                            <a href="forum-post.html?id=${post.id}" class="btn btn-sm btn-primary rounded-pill px-3 py-1 text-white">
+                                <i class="bi bi-chat-text me-1"></i>Open Question
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
