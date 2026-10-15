@@ -90,7 +90,9 @@ Return strictly a valid JSON object without any markdown code fence or extra tex
   "exam_tip": "High-yield university exam tip: how questions on this are formatted and what examiners look for to award full marks"
 }`;
 
-        const rawJson = await freeAiProvider.generateAnswer(prompt, { jsonMode: true });
+        const aiRes = await freeAiProvider.generateAnswer(prompt, { jsonMode: true });
+        const rawJson = typeof aiRes === "object" && aiRes.text ? aiRes.text : String(aiRes);
+        const providerName = typeof aiRes === "object" && aiRes.provider ? aiRes.provider : "Free AI Engine";
         const cleaned = rawJson.replace(/```json/gi, "").replace(/```/g, "").trim();
         const parsed = JSON.parse(cleaned);
 
@@ -98,7 +100,7 @@ Return strictly a valid JSON object without any markdown code fence or extra tex
             return {
                 ...parsed,
                 ai_generated: true,
-                provider: process.env.GEMINI_API_KEY ? "Google Gemini" : "Free AI Engine"
+                provider: providerName
             };
         }
     } catch (err) {
@@ -182,7 +184,8 @@ Provide a pedagogical breakdown in valid JSON format:
 }
 Return strictly valid JSON only.`;
 
-        const rawJson = await freeAiProvider.generateAnswer(prompt, { jsonMode: true });
+        const aiRes = await freeAiProvider.generateAnswer(prompt, { jsonMode: true });
+        const rawJson = typeof aiRes === "object" && aiRes.text ? aiRes.text : String(aiRes);
         const cleaned = rawJson.replace(/```json/gi, "").replace(/```/g, "").trim();
         const parsed = JSON.parse(cleaned);
 
@@ -213,35 +216,51 @@ Return strictly valid JSON only.`;
  * Interactive AI Doubt Solver / Chat Q&A
  */
 const askAIAssistant = async ({ question, subjectName = "", context = "" }) => {
-    const systemPrompt = `You are CampusQuest AI, an expert engineering professor and study mentor for computer science and engineering students. Provide clear, structured, accurate explanations with bullet points, code/formulas where helpful, and university exam relevance. Keep explanations pedagogical, engaging, and easy to understand.`;
+    const systemPrompt = `You are CampusQuest AI — an expert engineering professor and study mentor for computer science and engineering students (Anna University, VTU, JNTU curriculum).
+
+Your role:
+- Provide clear, accurate, well-structured answers to engineering doubts
+- Use bullet points, numbered lists, code blocks, and formulas where appropriate
+- Include time/space complexity for algorithm questions
+- Mention exam tips and how university examiners award marks
+- Keep explanations pedagogical, engaging, and easy to follow
+
+Always structure your answer with:
+1. Direct Answer / Definition
+2. Detailed Explanation (with examples, diagrams in text, pseudocode if relevant)
+3. Key Points to Remember
+4. Exam Tip (if applicable)`;
 
     const userPrompt = `Subject: ${subjectName || "Computer Science & Engineering"}
 ${context ? `Context: ${context}\n` : ""}
-Student Question/Doubt:
+Student Question:
 ${question}
 
 Please provide a detailed, well-structured answer:`;
 
     try {
-        const rawAnswer = await freeAiProvider.generateAnswer(userPrompt, { systemPrompt });
+        const aiRes = await freeAiProvider.generateAnswer(userPrompt, { systemPrompt });
+        const answerText = typeof aiRes === "object" && aiRes.text ? aiRes.text : String(aiRes);
+        const providerName = typeof aiRes === "object" && aiRes.provider ? aiRes.provider : "Free AI Engine";
         return {
             question,
             subject: subjectName || "Engineering",
-            answer: rawAnswer.trim(),
-            provider: process.env.GEMINI_API_KEY ? "Google Gemini" : "Free AI Engine (OpenAI/Pollinations)",
+            answer: answerText.trim(),
+            provider: providerName,
             timestamp: new Date().toISOString()
         };
     } catch (err) {
-        console.warn("AI askAIAssistant error, using fallback:", err.message);
+        console.warn("AI askAIAssistant all providers failed:", err.message);
         return {
             question,
             subject: subjectName || "Engineering",
-            answer: `Here is a foundational breakdown for "${question}":\n\n1. **Core Concept**: In ${subjectName || "Engineering"}, this relates to standard algorithmic logic, data structures, or system architecture.\n2. **Key Analysis**: Check the time/space complexities and invariants.\n3. **Recommendation**: Review corresponding course notes and practice problems in the CampusQuest library for step-by-step illustrations.`,
-            provider: "CampusQuest Offline Knowledge Engine",
+            answer: `I'm sorry, I couldn't connect to the AI service right now. Please try again in a moment.\n\nIn the meantime, here's a quick pointer for "${question}":\n\n1. **Check the relevant notes** in the CampusQuest Notes section for this subject.\n2. **Search PYQs** — past exam questions on this topic often reveal the key points examiners look for.\n3. **Post in the Forum** — other students and teachers can help with this doubt.`,
+            provider: "Offline Fallback",
             timestamp: new Date().toISOString()
         };
     }
 };
+
 
 const getExamIntelligence = async (subjectId) => {
     // Analyze PYQs and question distribution for the subject
