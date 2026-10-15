@@ -44,12 +44,20 @@
         <!-- Header -->
         <div class="card-cq p-4 mb-4 text-white" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4f46e5 100%);">
             <div class="row align-items-center">
-                <div class="col-md-9">
+                <div class="col-md-8">
                     <span class="badge bg-warning text-dark px-3 py-1.5 rounded-pill mb-2 fw-bold">
                         <i class="bi bi-stars me-1"></i>AI Learning Intelligence
                     </span>
                     <h2 class="fw-bold mb-2">CampusQuest AI Study Assistant</h2>
                     <p class="text-white-50 mb-0">Personalized study roadmaps based on your weak areas, interactive concept explanations, and university exam intelligence.</p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <button class="btn btn-sm btn-outline-light rounded-pill px-3 py-2 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#aiConfigModal">
+                        <i class="bi bi-gear-fill me-1"></i>AI Engine & Settings
+                    </button>
+                    <div class="small text-white-50 mt-1" id="active-engine-badge">
+                        <i class="bi bi-shield-check text-success me-1"></i>Curriculum Engine Active
+                    </div>
                 </div>
             </div>
         </div>
@@ -306,6 +314,55 @@
                         <ul class="small text-muted mb-2 d-flex flex-column gap-1" id="intel-tips"></ul>
                         <div class="text-muted" style="font-size: 0.72rem;" id="intel-disclaimer"></div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Settings Modal -->
+    <div class="modal fade" id="aiConfigModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title"><i class="bi bi-cpu me-2 text-warning"></i>AI Provider & Engine Settings</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="card bg-light border-0 p-3 mb-3">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="small fw-bold text-muted text-uppercase">Current Active Engine</span>
+                            <span class="badge bg-success" id="modal-active-provider-badge">Curriculum Engine</span>
+                        </div>
+                        <div class="small fw-semibold text-dark" id="modal-active-provider-name">CampusQuest Engineering Knowledge Base</div>
+                    </div>
+
+                    <div class="alert alert-primary small mb-3">
+                        <i class="bi bi-info-circle-fill me-1"></i>CampusQuest includes an automatic engineering curriculum engine. For unlimited real-time generation on <strong>any</strong> custom topic or research question, connect your own free API key (no credit card needed).
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Select Provider</label>
+                        <select class="form-select" id="ai-provider-select">
+                            <option value="gemini" selected>Google Gemini 1.5 Flash (1,500 req/day FREE)</option>
+                            <option value="groq">Groq (LLaMA 3.3 70B - Ultra Fast & FREE)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">API Key</label>
+                        <input type="password" class="form-control font-monospace" id="ai-key-input" placeholder="Paste your API key here (e.g. AIzaSy... or gsk_...)">
+                        <div class="form-text small mt-1.5" id="ai-key-hint">
+                            Get your free key in 30 seconds at <a href="https://aistudio.google.com/app/apikey" target="_blank" class="fw-bold text-decoration-none">Google AI Studio <i class="bi bi-box-arrow-up-right"></i></a> (100% free forever, no credit card required).
+                        </div>
+                    </div>
+
+                    <div id="ai-config-alert" class="d-none alert small"></div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btn-sm px-3" id="btn-save-ai-key">
+                        <i class="bi bi-check2-circle me-1"></i>Test & Save Key
+                    </button>
                 </div>
             </div>
         </div>

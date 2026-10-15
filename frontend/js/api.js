@@ -412,6 +412,17 @@ const API = {
         });
     },
 
+    getAiStatus() {
+        return this.request("/ai/status");
+    },
+
+    configureAiKey(provider, apiKey) {
+        return this.request("/ai/configure-key", {
+            method: "POST",
+            body: JSON.stringify({ provider, api_key: apiKey })
+        });
+    },
+
     // Discussion Forum
     getForumPosts(params = {}) {
         const query = new URLSearchParams(params).toString();

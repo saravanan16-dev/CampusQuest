@@ -330,3 +330,106 @@ async function runExamIntelligence() {
     }
 }
 window.runExamIntelligence = runExamIntelligence;
+
+// ─── 5. AI Settings & Key Configuration ───────────────────────────────────────
+async function loadAiStatus() {
+    try {
+        const res = await API.getAiStatus();
+        if (res.success && res.data) {
+            const data = res.data;
+            const badge = document.getElementById("active-engine-badge");
+            const modalBadge = document.getElementById("modal-active-provider-badge");
+            const modalName = document.getElementById("modal-active-provider-name");
+
+            if (data.has_gemini) {
+                if (badge) badge.innerHTML = `<i class="bi bi-stars text-warning me-1"></i>Google Gemini Active`;
+                if (modalBadge) { modalBadge.className = "badge bg-primary"; modalBadge.innerText = "Gemini 1.5 Flash"; }
+                if (modalName) modalName.innerText = "Google Gemini 1.5 Flash (1,500 req/day Free)";
+            } else if (data.has_groq) {
+                if (badge) badge.innerHTML = `<i class="bi bi-lightning-charge-fill text-warning me-1"></i>Groq LLaMA Active`;
+                if (modalBadge) { modalBadge.className = "badge bg-info text-dark"; modalBadge.innerText = "Groq LLaMA 3.3"; }
+                if (modalName) modalName.innerText = "Groq LLaMA 3.3 70B (Ultra-Fast Free Tier)";
+            } else {
+                if (badge) badge.innerHTML = `<i class="bi bi-shield-check text-success me-1"></i>Curriculum Engine Active`;
+                if (modalBadge) { modalBadge.className = "badge bg-success"; modalBadge.innerText = "Built-in Engine"; }
+                if (modalName) modalName.innerText = "CampusQuest Engineering Knowledge Engine";
+            }
+        }
+    } catch (e) {
+        console.warn("Failed to load AI status:", e);
+    }
+}
+
+function initAiSettings() {
+    loadAiStatus();
+
+    const providerSelect = document.getElementById("ai-provider-select");
+    const hint = document.getElementById("ai-key-hint");
+    if (providerSelect && hint) {
+        providerSelect.addEventListener("change", () => {
+            if (providerSelect.value === "gemini") {
+                hint.innerHTML = `Get your free key in 30 seconds at <a href="https://aistudio.google.com/app/apikey" target="_blank" class="fw-bold text-decoration-none">Google AI Studio <i class="bi bi-box-arrow-up-right"></i></a> (100% free forever, no credit card required).`;
+            } else {
+                hint.innerHTML = `Get your free key in 30 seconds at <a href="https://console.groq.com" target="_blank" class="fw-bold text-decoration-none">Groq Console <i class="bi bi-box-arrow-up-right"></i></a> (100% free forever, no credit card required).`;
+            }
+        });
+    }
+
+    const saveBtn = document.getElementById("btn-save-ai-key");
+    if (saveBtn) {
+        saveBtn.addEventListener("click", async () => {
+            const provider = document.getElementById("ai-provider-select").value;
+            const key = document.getElementById("ai-key-input").value.trim();
+            const alertBox = document.getElementById("ai-config-alert");
+
+            if (!key) {
+                alertBox.className = "alert alert-danger small";
+                alertBox.innerText = "Please paste an API key first.";
+                alertBox.classList.remove("d-none");
+                return;
+            }
+
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Verifying with ${provider}...`;
+            alertBox.classList.add("d-none");
+
+            try {
+                const res = await API.configureAiKey(provider, key);
+                if (res.success) {
+                    alertBox.className = "alert alert-success small";
+                    alertBox.innerText = res.message || "Key verified and saved successfully!";
+                    alertBox.classList.remove("d-none");
+                    document.getElementById("ai-key-input").value = "";
+                    loadAiStatus();
+                    Auth.showToast(`Connected to ${res.provider}!`, "success");
+                    setTimeout(() => {
+                        const modalEl = document.getElementById("aiConfigModal");
+                        if (modalEl) {
+                            const modal = bootstrap.Modal.getInstance(modalEl);
+                            if (modal) modal.hide();
+                        }
+                    }, 1200);
+                } else {
+                    alertBox.className = "alert alert-danger small";
+                    alertBox.innerText = res.message || "Failed to verify key.";
+                    alertBox.classList.remove("d-none");
+                }
+            } catch (err) {
+                alertBox.className = "alert alert-danger small";
+                alertBox.innerText = err.message || "Network error verifying key.";
+                alertBox.classList.remove("d-none");
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = `<i class="bi bi-check2-circle me-1"></i>Test & Save Key`;
+            }
+        });
+    }
+}
+
+// Run settings initialization when DOM is ready
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initAiSettings);
+} else {
+    initAiSettings();
+}
+

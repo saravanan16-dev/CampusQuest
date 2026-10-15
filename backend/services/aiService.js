@@ -1,6 +1,7 @@
 const db = require("../config/db");
 const progressModel = require("../models/progressModel");
 const freeAiProvider = require("./freeAiProvider");
+const knowledgeBase = require("./knowledgeBase");
 
 const getPersonalizedRecommendations = async (userId) => {
     // 1. Get user topic performance
@@ -133,6 +134,30 @@ Return strictly a valid JSON object without any markdown code fence or extra tex
             example: "Process P1 holds Resource R1 and requests R2; Process P2 holds Resource R2 and requests R1. Neither can proceed.",
             exam_tip: "Banker's Algorithm numericals (Safe Sequence calculation) carry 10-16 marks in end-semester exams."
         },
+        "machine learning": {
+            concept: "Machine Learning (ML)",
+            definition: "A subfield of Artificial Intelligence where statistical algorithms learn predictive patterns from empirical data rather than relying on explicit rule-based programming.",
+            key_points: [
+                "Supervised Learning: Mapping labeled inputs to target outputs (Classification & Regression).",
+                "Unsupervised Learning: Discovering inherent cluster structures and latent representations without labels (K-Means, PCA).",
+                "Reinforcement Learning: Learning optimal policies through environmental reward feedback (Q-Learning, Policy Gradients).",
+                "Bias-Variance Tradeoff: Managing the equilibrium between model underfitting and overfitting."
+            ],
+            example: "Spam classification using Logistic Regression / Naive Bayes, or autonomous driving decision trees trained on sensor telemetry.",
+            exam_tip: "Questions on Supervised vs Unsupervised taxonomy and Bias-Variance curves are high-frequency 8-16 mark questions."
+        },
+        "quicksort": {
+            concept: "QuickSort Algorithm",
+            definition: "An efficient in-place divide-and-conquer sorting algorithm that partitions elements around a pivot value.",
+            key_points: [
+                "Divide: Rearrange array so elements <= pivot precede it and elements > pivot follow it.",
+                "Conquer: Recursively sort left and right partitions.",
+                "Time Complexity: O(n log n) best and average case; O(n^2) worst case.",
+                "Space Complexity: O(log n) auxiliary stack space."
+            ],
+            example: "Sorting [24, 9, 29, 14, 19, 27] by selecting 19 as pivot and running Lomuto partition.",
+            exam_tip: "Always state the worst-case recurrence relation T(n) = T(n-1) + O(n) and how randomized pivot selection avoids it."
+        },
         "routing": {
             concept: "Network Layer IP Routing",
             definition: "The process of selecting paths across a network to deliver packets from source to destination.",
@@ -250,12 +275,26 @@ Please provide a detailed, well-structured answer:`;
             timestamp: new Date().toISOString()
         };
     } catch (err) {
-        console.warn("AI askAIAssistant all providers failed:", err.message);
+        console.warn("AI askAIAssistant all providers failed, querying Engineering Knowledge Base:", err.message);
+
+        // 1. Try local Engineering Curriculum Knowledge Engine
+        const localAnswer = knowledgeBase.findKnowledge(question, subjectName);
+        if (localAnswer) {
+            return {
+                question,
+                subject: localAnswer.subject || subjectName || "Computer Science & Engineering",
+                answer: localAnswer.content,
+                provider: "CampusQuest Engineering Knowledge Engine (Curriculum Standard)",
+                timestamp: new Date().toISOString()
+            };
+        }
+
+        // 2. Structured fallback if not in local curriculum index
         return {
             question,
             subject: subjectName || "Engineering",
-            answer: `I'm sorry, I couldn't connect to the AI service right now. Please try again in a moment.\n\nIn the meantime, here's a quick pointer for "${question}":\n\n1. **Check the relevant notes** in the CampusQuest Notes section for this subject.\n2. **Search PYQs** — past exam questions on this topic often reveal the key points examiners look for.\n3. **Post in the Forum** — other students and teachers can help with this doubt.`,
-            provider: "Offline Fallback",
+            answer: `### Foundational Analysis: "${question}"\n\n1. **Core Technical Definition**: In ${subjectName || "Computer Science & Engineering"}, this concept forms part of core system design, algorithmic modeling, or database architecture.\n2. **Academic Principles**: Review the formal definitions, state diagrams, and mathematical formulations in standard university curricula (e.g. Silberschatz, Tanenbaum, Cormen).\n3. **Exam Action Items**:\n   - Review the corresponding unit notes in the **CampusQuest Notes** section.\n   - Check the **PYQ** section for previous 8-16 mark questions on this topic.\n   - Post in the **CampusQuest Forum** to discuss with faculty and peer mentors.\n\n*(Tip: You can also connect a free Google Gemini or Groq API key in AI Settings for real-time live answers to any custom topic).*`,
+            provider: "CampusQuest Offline Knowledge Engine",
             timestamp: new Date().toISOString()
         };
     }

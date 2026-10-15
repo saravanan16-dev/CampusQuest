@@ -4,7 +4,9 @@ const {
     explainConcept,
     explainWrongAnswer,
     getExamIntelligence,
-    askAIAssistant
+    askAIAssistant,
+    getAiStatus,
+    configureAiKey
 } = require("../controllers/aiController");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -16,5 +18,8 @@ router.post("/ai/explain-wrong-answer", explainWrongAnswer);
 router.get("/ai/exam-intelligence/:subjectId", getExamIntelligence);
 router.post("/ai/ask", askAIAssistant);
 router.post("/ai/chat", askAIAssistant);
+router.get("/ai/status", getAiStatus);
+router.post("/ai/configure-key", configureAiKey);
 
 module.exports = router;
+
