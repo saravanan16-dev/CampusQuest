@@ -86,9 +86,39 @@ const getExamIntelligence = async (req, res) => {
     }
 };
 
+const askAIAssistant = async (req, res) => {
+    try {
+        const { question, subject_name, context } = req.body;
+        if (!question || !question.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Question is required for AI generation"
+            });
+        }
+
+        const data = await aiService.askAIAssistant({
+            question,
+            subjectName: subject_name,
+            context
+        });
+
+        res.json({
+            success: true,
+            data
+        });
+    } catch (error) {
+        console.error("Ask AI Assistant error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Failed to generate AI answer"
+        });
+    }
+};
+
 module.exports = {
     getPersonalizedRecommendations,
     explainConcept,
     explainWrongAnswer,
-    getExamIntelligence
+    getExamIntelligence,
+    askAIAssistant
 };

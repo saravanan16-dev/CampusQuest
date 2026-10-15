@@ -405,6 +405,13 @@ const API = {
         return this.request(`/ai/exam-intelligence/${subjectId}`);
     },
 
+    askAIAssistant(payload) {
+        return this.request("/ai/ask", {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+    },
+
     // Discussion Forum
     getForumPosts(params = {}) {
         const query = new URLSearchParams(params).toString();

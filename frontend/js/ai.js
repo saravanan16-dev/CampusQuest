@@ -1,6 +1,9 @@
 /**
  * AI Study Buddy & Exam Intelligence Controller
+ * Powered by Free AI Generation Engine
  */
+
+let lastAiAnswer = "";
 
 document.addEventListener("DOMContentLoaded", async () => {
     Auth.requireAuth();
@@ -22,9 +25,129 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    document.getElementById("concept-form").addEventListener("submit", handleConceptExplain);
+    const askForm = document.getElementById("ask-ai-form");
+    if (askForm) {
+        askForm.addEventListener("submit", handleAskAI);
+    }
+
+    const conceptForm = document.getElementById("concept-form");
+    if (conceptForm) {
+        conceptForm.addEventListener("submit", handleConceptExplain);
+    }
 });
 
+// ─── 0. Ask AI Study Buddy ────────────────────────────────────────────────────
+async function handleAskAI(e) {
+    e.preventDefault();
+    const question = document.getElementById("ask-input").value.trim();
+    const subjectSelect = document.getElementById("ask-subject-select");
+    const subjectName = subjectSelect ? subjectSelect.value : "";
+    const btn = document.getElementById("ask-btn");
+
+    if (!question) {
+        Auth.showToast("Please enter a question or doubt", "warning");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Thinking...`;
+
+    document.getElementById("ask-placeholder").classList.add("d-none");
+    document.getElementById("ask-results").classList.add("d-none");
+    document.getElementById("ask-loading").classList.remove("d-none");
+
+    try {
+        const res = await API.askAIAssistant({
+            question,
+            subject_name: subjectName
+        });
+
+        document.getElementById("ask-loading").classList.add("d-none");
+
+        if (res.success && res.data) {
+            renderAiAnswer(res.data);
+        } else {
+            document.getElementById("ask-placeholder").classList.remove("d-none");
+            Auth.showToast(res.message || "Failed to generate answer", "error");
+        }
+    } catch (err) {
+        console.error("AI Assistant error:", err);
+        document.getElementById("ask-loading").classList.add("d-none");
+        document.getElementById("ask-placeholder").classList.remove("d-none");
+        Auth.showToast(err.message || "Could not generate answer. Please try again.", "error");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="bi bi-send-fill me-1"></i>Generate AI Answer`;
+    }
+}
+
+function renderAiAnswer(data) {
+    lastAiAnswer = data.answer || "";
+    const resBox = document.getElementById("ask-results");
+    resBox.classList.remove("d-none");
+
+    document.getElementById("ask-result-subject").innerText = data.subject || "Engineering";
+    document.getElementById("ask-result-provider").innerText = data.provider || "Free AI Engine";
+    document.getElementById("ask-result-question").innerText = data.question;
+
+    const bodyEl = document.getElementById("ask-result-body");
+    bodyEl.innerHTML = formatAiMarkdown(data.answer);
+}
+
+function quickAsk(question, subject) {
+    document.getElementById("ask-input").value = question;
+    const select = document.getElementById("ask-subject-select");
+    if (select) {
+        // Find matching option
+        for (let i = 0; i < select.options.length; i++) {
+            if (select.options[i].text.includes(subject) || select.options[i].value === subject) {
+                select.selectedIndex = i;
+                break;
+            }
+        }
+    }
+    const form = document.getElementById("ask-ai-form");
+    if (form) form.dispatchEvent(new Event("submit"));
+}
+window.quickAsk = quickAsk;
+
+function copyAiAnswer() {
+    if (!lastAiAnswer) return;
+    navigator.clipboard.writeText(lastAiAnswer).then(() => {
+        Auth.showToast("Answer copied to clipboard!", "success");
+    }).catch(() => {
+        Auth.showToast("Could not copy answer", "warning");
+    });
+}
+window.copyAiAnswer = copyAiAnswer;
+
+function formatAiMarkdown(text) {
+    if (!text) return "";
+    let formatted = escapeHtml(text);
+
+    // Code blocks ```code```
+    formatted = formatted.replace(/```([\s\S]*?)```/g, '<pre class="bg-dark text-light p-2 rounded small my-2"><code>$1</code></pre>');
+    // Inline code `code`
+    formatted = formatted.replace(/`([^`]+)`/g, '<code class="bg-secondary-subtle px-1 rounded text-primary">$1</code>');
+    // Bold **text**
+    formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    // Italic *text*
+    formatted = formatted.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+    return formatted;
+}
+
+function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+// ─── 1. Personalized Recommendations ─────────────────────────────────────────
 async function loadAIRecommendations() {
     try {
         const res = await API.getAIRecommendations();
@@ -80,6 +203,7 @@ async function loadAIRecommendations() {
     }
 }
 
+// ─── 2. Concept Explainer ─────────────────────────────────────────────────────
 async function handleConceptExplain(e) {
     e.preventDefault();
     const concept = document.getElementById("concept-input").value.trim();
@@ -87,7 +211,7 @@ async function handleConceptExplain(e) {
     const btn = document.getElementById("concept-btn");
 
     btn.disabled = true;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Analyzing concept...`;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Generating explanation...`;
 
     try {
         const res = await API.explainConcept(concept, subject);
@@ -116,30 +240,41 @@ function renderConceptOutput(data) {
     const resBox = document.getElementById("concept-results");
     resBox.classList.remove("d-none");
 
-    document.getElementById("concept-title").innerText = data.concept;
+    document.getElementById("concept-title").innerHTML = `
+        ${escapeHtml(data.concept)}
+        ${data.ai_generated ? '<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill small ms-2 fs-6"><i class="bi bi-stars me-1"></i>AI Generated</span>' : ''}
+    `;
     document.getElementById("concept-def").innerText = data.definition;
 
     const pointsList = document.getElementById("concept-points");
-    pointsList.innerHTML = (data.key_points || []).map(pt => `<li>${pt}</li>`).join("");
+    pointsList.innerHTML = (data.key_points || []).map(pt => `<li>${escapeHtml(pt)}</li>`).join("");
 
     document.getElementById("concept-example").innerText = data.example || "Practical industry example.";
     document.getElementById("concept-tip").innerText = data.exam_tip || "Highlight key definitions and formulas in exam answers.";
 }
 
+// ─── 3. Exam Intelligence ─────────────────────────────────────────────────────
 async function loadSubjectsDropdown() {
     try {
         const res = await API.getSubjects();
-        if (res.success) {
-            const select = document.getElementById("exam-subject-select");
+        if (res.success && res.data) {
+            const examSelect = document.getElementById("exam-subject-select");
+            const askSelect = document.getElementById("ask-subject-select");
+
             res.data.forEach(s => {
-                const opt = document.createElement("option");
-                opt.value = s.id;
-                opt.textContent = `${s.name} (Semester ${s.semester})`;
-                select.appendChild(opt);
+                const opt1 = document.createElement("option");
+                opt1.value = s.id;
+                opt1.textContent = `${s.name} (Semester ${s.semester})`;
+                if (examSelect) examSelect.appendChild(opt1);
+
+                const opt2 = document.createElement("option");
+                opt2.value = s.name;
+                opt2.textContent = s.name;
+                if (askSelect) askSelect.appendChild(opt2);
             });
         }
     } catch (e) {
-        console.error("Failed to load subjects for exam intelligence:", e);
+        console.error("Failed to load subjects dropdowns:", e);
     }
 }
 

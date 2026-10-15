@@ -1,5 +1,6 @@
 const db = require("../config/db");
 const progressModel = require("../models/progressModel");
+const freeAiProvider = require("./freeAiProvider");
 
 const getPersonalizedRecommendations = async (userId) => {
     // 1. Get user topic performance
@@ -68,8 +69,43 @@ const getPersonalizedRecommendations = async (userId) => {
     };
 };
 
+/**
+ * Real-time AI Concept Explainer powered by Free AI Provider
+ */
 const explainConcept = async (concept, subjectName = "") => {
-    // Knowledge base for common core engineering concepts
+    // Attempt free AI generation first
+    try {
+        const prompt = `You are a computer science & engineering professor. Explain the engineering concept "${concept}" in the context of "${subjectName || 'Computer Science Engineering'}".
+Return strictly a valid JSON object without any markdown code fence or extra text:
+{
+  "concept": "${concept}",
+  "definition": "Precise, formal technical definition (2-3 sentences)",
+  "key_points": [
+    "Core theoretical or algorithmic principle 1",
+    "Core theoretical or algorithmic principle 2",
+    "Core theoretical or algorithmic principle 3",
+    "Core theoretical or algorithmic principle 4"
+  ],
+  "example": "A concrete technical example, algorithm trace, or real-world systems architecture example",
+  "exam_tip": "High-yield university exam tip: how questions on this are formatted and what examiners look for to award full marks"
+}`;
+
+        const rawJson = await freeAiProvider.generateAnswer(prompt, { jsonMode: true });
+        const cleaned = rawJson.replace(/```json/gi, "").replace(/```/g, "").trim();
+        const parsed = JSON.parse(cleaned);
+
+        if (parsed.concept && parsed.definition && Array.isArray(parsed.key_points)) {
+            return {
+                ...parsed,
+                ai_generated: true,
+                provider: process.env.GEMINI_API_KEY ? "Google Gemini" : "Free AI Engine"
+            };
+        }
+    } catch (err) {
+        console.warn("AI explainConcept error, falling back to knowledge base:", err.message);
+    }
+
+    // Curated fallback knowledge base for core topics
     const explanations = {
         "normalization": {
             concept: "Database Normalization",
@@ -110,7 +146,7 @@ const explainConcept = async (concept, subjectName = "") => {
 
     const key = Object.keys(explanations).find(k => concept.toLowerCase().includes(k));
     if (key) {
-        return explanations[key];
+        return { ...explanations[key], ai_generated: false };
     }
 
     return {
@@ -122,19 +158,89 @@ const explainConcept = async (concept, subjectName = "") => {
             "Analyze standard university problem types and edge cases."
         ],
         example: `Practical implementation of ${concept} in modern software architecture.`,
-        exam_tip: `Draw neat architectural / block diagrams in exam answers for ${concept} to secure high marks.`
+        exam_tip: `Draw neat architectural / block diagrams in exam answers for ${concept} to secure high marks.`,
+        ai_generated: false
     };
 };
 
+/**
+ * Real-time AI Wrong Answer Pedagogical Breakdown
+ */
 const explainWrongAnswer = async ({ questionText, selectedAnswer, correctAnswer, explanation }) => {
-    return {
-        question: questionText,
-        your_answer: selectedAnswer,
-        correct_answer: correctAnswer,
-        why_incorrect: `Option ${selectedAnswer} is incorrect because it does not satisfy the required system constraint or definition.`,
-        concept_breakdown: explanation || `The correct answer is Option ${correctAnswer}. Review the core rule governing this behavior to avoid this common misconception.`,
-        recommended_action: "Practice 3 related questions on this specific topic to solidify your intuition."
-    };
+    try {
+        const prompt = `A student answered a multiple choice engineering question incorrectly.
+Question: "${questionText}"
+Student selected: "${selectedAnswer}"
+Correct answer: "${correctAnswer}"
+${explanation ? `Reference Explanation: "${explanation}"` : ""}
+
+Provide a pedagogical breakdown in valid JSON format:
+{
+  "why_incorrect": "Clear explanation of why option ${selectedAnswer} is incorrect and the misconception behind choosing it (1-2 sentences)",
+  "concept_breakdown": "Explanation of why option ${correctAnswer} is correct and the fundamental rule (2-3 sentences)",
+  "recommended_action": "Specific practice or study recommendation"
+}
+Return strictly valid JSON only.`;
+
+        const rawJson = await freeAiProvider.generateAnswer(prompt, { jsonMode: true });
+        const cleaned = rawJson.replace(/```json/gi, "").replace(/```/g, "").trim();
+        const parsed = JSON.parse(cleaned);
+
+        return {
+            question: questionText,
+            your_answer: selectedAnswer,
+            correct_answer: correctAnswer,
+            why_incorrect: parsed.why_incorrect,
+            concept_breakdown: parsed.concept_breakdown,
+            recommended_action: parsed.recommended_action,
+            ai_generated: true
+        };
+    } catch (err) {
+        console.warn("AI explainWrongAnswer error, using fallback:", err.message);
+        return {
+            question: questionText,
+            your_answer: selectedAnswer,
+            correct_answer: correctAnswer,
+            why_incorrect: `Option ${selectedAnswer} is incorrect because it does not satisfy the required system constraint or definition.`,
+            concept_breakdown: explanation || `The correct answer is Option ${correctAnswer}. Review the core rule governing this behavior to avoid this common misconception.`,
+            recommended_action: "Practice 3 related questions on this specific topic to solidify your intuition.",
+            ai_generated: false
+        };
+    }
+};
+
+/**
+ * Interactive AI Doubt Solver / Chat Q&A
+ */
+const askAIAssistant = async ({ question, subjectName = "", context = "" }) => {
+    const systemPrompt = `You are CampusQuest AI, an expert engineering professor and study mentor for computer science and engineering students. Provide clear, structured, accurate explanations with bullet points, code/formulas where helpful, and university exam relevance. Keep explanations pedagogical, engaging, and easy to understand.`;
+
+    const userPrompt = `Subject: ${subjectName || "Computer Science & Engineering"}
+${context ? `Context: ${context}\n` : ""}
+Student Question/Doubt:
+${question}
+
+Please provide a detailed, well-structured answer:`;
+
+    try {
+        const rawAnswer = await freeAiProvider.generateAnswer(userPrompt, { systemPrompt });
+        return {
+            question,
+            subject: subjectName || "Engineering",
+            answer: rawAnswer.trim(),
+            provider: process.env.GEMINI_API_KEY ? "Google Gemini" : "Free AI Engine (OpenAI/Pollinations)",
+            timestamp: new Date().toISOString()
+        };
+    } catch (err) {
+        console.warn("AI askAIAssistant error, using fallback:", err.message);
+        return {
+            question,
+            subject: subjectName || "Engineering",
+            answer: `Here is a foundational breakdown for "${question}":\n\n1. **Core Concept**: In ${subjectName || "Engineering"}, this relates to standard algorithmic logic, data structures, or system architecture.\n2. **Key Analysis**: Check the time/space complexities and invariants.\n3. **Recommendation**: Review corresponding course notes and practice problems in the CampusQuest library for step-by-step illustrations.`,
+            provider: "CampusQuest Offline Knowledge Engine",
+            timestamp: new Date().toISOString()
+        };
+    }
 };
 
 const getExamIntelligence = async (subjectId) => {
@@ -168,7 +274,6 @@ const getExamIntelligence = async (subjectId) => {
 
     const frequencyList = Object.values(topicFrequency).sort((a, b) => b.frequency - a.frequency);
 
-    const highPriorityUnits = [1, 2, 3];
     const revisionPriorities = frequencyList.slice(0, 4).map(item => ({
         topic: item.topic,
         unit: item.unit,
@@ -201,5 +306,6 @@ module.exports = {
     getPersonalizedRecommendations,
     explainConcept,
     explainWrongAnswer,
+    askAIAssistant,
     getExamIntelligence
 };
